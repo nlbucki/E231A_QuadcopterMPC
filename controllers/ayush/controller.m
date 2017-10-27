@@ -1,7 +1,7 @@
 function u = controller(obj, t, x)
 
-dof = 6;
-nAct = 2;
+dof = obj.nDof;
+nAct = obj.nAct;
 
 % params = obj.controlParams;
 
@@ -9,4 +9,4 @@ nAct = 2;
 
 K = lqr(A,B, 5*eye(dof), eye(nAct));
 
-u = -K*x + [obj.mQ*obj.g;obj.mQ*obj.g]/2;
+u = -K*x + [obj.mQ*obj.g;obj.mQ*obj.g]./2;

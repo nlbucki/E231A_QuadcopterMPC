@@ -2,27 +2,30 @@ classdef Quadrotor
 
 properties
     
-	mQ@double
-	JQ@double
-	lQ@double
-	g@double
+    mQ@double
+    JQ@double
+    lQ@double
+    g@double
 
-	Fmin@double
-	Fmax@double
-	Mmin@double
-	Mmax@double
-    
+    Fmin@double
+    Fmax@double
+    Mmin@double
+    Mmax@double
+
     controller@function_handle
     controlParams@struct
-    
-    nDof = 6;
-    nAct = 2;
+
+
     
     % TODO: Add hanging load
 %     mL@double
 
 end
 
+properties (Constant = true)
+    nDof = 6;
+    nAct = 2;
+end
 methods
 	
 	% class constructor
@@ -95,7 +98,8 @@ methods
     function u = calcControlInput(obj, t, x)
         u = obj.controller(obj, t,x);
     end
-%     [A, B] = discretizeQuadrotor(Ts);
+    
+    [A, B] = discretizeLinearizeQuadrotor(obj, Ts, xk, uk);
     % TODO:
 %     obj = setLoadMass(mL); 
 end
