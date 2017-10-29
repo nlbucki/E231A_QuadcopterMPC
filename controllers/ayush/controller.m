@@ -10,3 +10,4 @@ nAct = obj.nAct;
 K = lqr(A,B, 5*eye(dof), eye(nAct));
 
 u = -K*x + [obj.mQ*obj.g;obj.mQ*obj.g]./2;
+end

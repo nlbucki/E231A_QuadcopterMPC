@@ -31,7 +31,7 @@ methods
 	% class constructor
 	function obj = Quadrotor(params)
         
-		if isfield(params, 'mQ')
+        if isfield(params, 'mQ')
             obj.mQ = params.mQ;
         else
             obj.mQ = 2;
