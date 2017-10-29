@@ -1,6 +1,6 @@
 
 %% Add paths
-user = 'ayush';
+user = 'david';
 % addpath(genpath([pwd, '/@Quadrotor']));
 addpath(genpath([pwd, '/controllers/', user]));
 addpath(genpath([pwd, '/gen/']));
@@ -8,7 +8,7 @@ addpath(genpath([pwd, '/gen/']));
 %% Build quadrotor system
 params = struct;
 sys = Quadrotor(params);
-sys.controller = @controller;
+sys.controller = @controller_dlqr;
 
 %% Simulate System
 solver = @ode45;
