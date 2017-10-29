@@ -2,7 +2,7 @@
 %% Add paths
 user = 'ayush';
 % addpath(genpath([pwd, '/@Quadrotor']));
-addpath(genpath([pwd, '/controllers/', user]));
+addpath(genpath([pwd, '/controllers/']));
 addpath(genpath([pwd, '/gen/']));
 
 %% Reset workspace
@@ -13,11 +13,11 @@ close all
 %% Build quadrotor system
 params = struct;
 sys = Quadrotor(params);
-sys.controller = @controller;
+sys.controller = @controller_pd;
 
 %% Simulate System
 solver = @ode45;
-tspan = [0,5];
+tspan = [0,10];
 x0 = [-10.5;-10.5;0;0;0;0];
 sol = sys.simulate(tspan, x0, solver);
 %% Plot
