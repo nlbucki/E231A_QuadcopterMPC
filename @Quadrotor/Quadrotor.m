@@ -15,7 +15,6 @@ properties
     controller@function_handle
     controlParams@struct
 
-
     
     % TODO: Add hanging load
 %     mL@double
@@ -31,7 +30,7 @@ methods
 	% class constructor
 	function obj = Quadrotor(params)
         
-		if isfield(params, 'mQ')
+        if isfield(params, 'mQ')
             obj.mQ = params.mQ;
         else
             obj.mQ = 2;
@@ -58,7 +57,7 @@ methods
         else
             obj.g = 9.81;
         end
-        
+                
     end     
     
     % set property values
@@ -102,6 +101,11 @@ methods
     [A, B] = discretizeLinearizeQuadrotor(obj, Ts, xk, uk);
     % TODO:
 %     obj = setLoadMass(mL); 
+
+    % animation
+    animateQuadrotor(obj,t,x,varargin)
+    
+    
 end
 
 end
