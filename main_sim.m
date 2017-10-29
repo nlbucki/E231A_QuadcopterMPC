@@ -5,9 +5,10 @@ user = 'ayush';
 addpath(genpath([pwd, '/controllers/', user]));
 addpath(genpath([pwd, '/gen/']));
 
-%% reset
+%% Reset workspace
 clear
 clc
+close all
 
 %% Build quadrotor system
 params = struct;
@@ -45,4 +46,9 @@ ylabel('inputs');
 grid on;
 
 %% Animate
-sys.animateQuadrotor(time,states,[0;0]);
+opts.t = time;
+opts.x = states;
+opts.vid.MAKE_MOVIE = false;
+opts.vid.filename = './results/vid1';
+sys.animateQuadrotor(opts);
+
