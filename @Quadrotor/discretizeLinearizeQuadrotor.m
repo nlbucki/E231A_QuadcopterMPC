@@ -4,6 +4,7 @@ function [Ad, Bd] = discretizeLinearizeQuadrotor(obj, Ts, xk, uk)
 % x(k+1) = Ad*x(k) + Bd*u(k).
 
 [A, B] = obj.linearizeQuadrotor(xk, uk);
+
 % Ad = eye(obj.nDof) + Ts*A;
 % Bd = Ts*B;
 % Discretize the matrices
@@ -19,3 +20,4 @@ else
     Bd = exponMat(1:size(B,1),(size(A,2)+1):(size(A,2)+size(B,2)));
 end
 end
+
