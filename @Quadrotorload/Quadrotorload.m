@@ -1,5 +1,5 @@
-classdef QuadrotorLoad
-
+classdef Quadrotorload
+% Dynamics for Quadrotor with load suspended through a cable
 properties
     
     mQ@double
@@ -15,14 +15,12 @@ properties
     controller@function_handle
     controlParams@struct
 
-    
-    % TODO: Add hanging load
-%     mL@double
-
+    mL@double
+    l@double
 end
 
 properties (Constant = true)
-    nDof = 6;
+    nDof = 8;
     nAct = 2;
 end
 methods
@@ -57,7 +55,18 @@ methods
         else
             obj.g = 9.81;
         end
+
+        if isfield(params, 'mL')
+            obj.mL = params.mL;
+        else
+            obj.mL = 0.5;
+        end
                 
+        if isfield(params, 'l')
+            obj.l = params.l;
+        else
+            obj.l = 0.25;
+        end
     end     
     
     % set property values
@@ -77,13 +86,13 @@ methods
     function [f, g] = quadVectorFields(obj, x)
 %         params = [mQ;JQ;lQ;g];
         params = [obj.mQ;obj.JQ;obj.lQ;obj.g];
-        [f,g] = quadrotorVectorFields(x,params);
+        [f,g] = quadrotorloadVectorFields(x,params);
     end
     
     function [A, B] = linearizeQuadrotor(obj, x0, u0)
 %         params = [mQ;JQ;lQ;g];
         params = [obj.mQ;obj.JQ;obj.lQ;obj.g];
-        [A, B] = quadrotorLinearDynamics(x0, u0, params);
+        [A, B] = quadrotorloadLinearDynamics(x0, u0, params);
     end
     
     function ddx = systemDynamics(obj, t, x)
@@ -98,12 +107,12 @@ methods
         u = obj.controller(obj, t,x);
     end
     
-    [A, B] = discretizeLinearizeQuadrotor(obj, Ts, xk, uk);
+    [A, B] = discretizeLinearizeQuadrotorload(obj, Ts, xk, uk);
     % TODO:
 %     obj = setLoadMass(mL); 
 
     % animation
-    animateQuadrotor(obj,t,x,varargin)
+    animateQuadrotorload(obj,t,x,varargin)
     
     
 end
