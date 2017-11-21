@@ -1,5 +1,5 @@
 function [Ad, Bd] = discretizeLinearizeQuadrotor(obj, Ts, xk, uk)
-% This function discretizes and lienarizes the quadrotor system dynamics to
+% This function discretizes and linearizes the quadrotor system dynamics to
 % the form
 % x(k+1) = Ad*x(k) + Bd*u(k).
 
