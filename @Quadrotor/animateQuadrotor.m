@@ -14,8 +14,8 @@ opts_default.vid.Quality = 100;
 opts_default.vid.FrameRate = 24;
 
 % initialize the animation figure and axes
-    figure_x_limits = [-3 3];
-    figure_y_limits = [-3 3];
+    figure_x_limits = [-2 2];
+    figure_y_limits = [-2 2];
     figure_z_limits = [0 1] ;
     fig1 = figure;
 
@@ -99,7 +99,7 @@ hist = 50 ;
         
         plot(x(max(1,i-hist):i, 1), x(max(1,i-hist):i, 2), 'k') ;
         if xd_flag
-            plot(xd(max(1,i-hist):i, 1), xd(max(1,i-hist):i, 2), 'og','linewidth',12) ;
+            plot(xd(max(1,i-hist):i, 1), xd(max(1,i-hist):i, 2), 'og','linewidth',6) ;
         end
     %         plot3(x(max(1,i-hist):i, 1)-L*x(max(1,i-hist):i,7), x(max(1,i-hist):i, 2)-L*x(max(1,i-hist):i,8), x(max(1,i-hist):i, 3)-L*x(max(1,i-hist):i,9), 'r') ;
             s = sprintf('Running\n t = %1.2fs \n 1/%d realtime speed',t(i), RATE/25);
