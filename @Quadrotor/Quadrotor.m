@@ -2,6 +2,7 @@ classdef Quadrotor
 %fdasf
 properties
     
+    type
     mQ@double
     JQ@double
     lQ@double
@@ -57,9 +58,11 @@ methods
         else
             obj.g = 9.81;
         end
+        
+        obj.type = 'quadrotor';
                 
     end     
-    
+%%    
     % set property values
     function obj = setProperty(obj, propertyName, value)
         if isprop(obj, propertyName)
@@ -101,13 +104,17 @@ methods
     function u = calcControlInput(obj, t, x)
         u = obj.controller(obj, t,x);
     end
-    
+ 
+%%  methods defined externally
+    % discrete dynamics
+    % dx = f(xref,uref) + A(x-xref)+B(u-uref)
     [A, B] = discretizeLinearizeQuadrotor(obj, Ts, xk, uk);
-    % TODO:
-%     obj = setLoadMass(mL); 
-
+    
+    % differential flatness
+    [ref] = flat2state(obj,flats);
+    
     % animation
-    animateQuadrotor(obj,t,x,varargin)
+    animateQuadrotor(obj,opts_in);
     
     
 end

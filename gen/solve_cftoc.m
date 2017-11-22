@@ -1,4 +1,4 @@
-function [ctl] = solve_for_cftoc(xk,xrefk,urefk,sys,params)
+function [ctl] = solve_cftoc(xk,xrefk,urefk,sys,params)
 %% function to Constrained Finite Time Optimal Control
 yalmip('clear');
 
@@ -18,7 +18,7 @@ u = sdpvar(sys.nAct,N);
 % reference state variables
 xref = sdpvar(sys.nDof,N+1);
 % reference input variables
-uref = sdpvar(sys.nAct,N);
+uref = sdpvar(sys.nAct,N+1);
 
 
 %% cost function and constraints
@@ -31,19 +31,26 @@ constraints = [];
 constraints = [constraints, x(:,1)==xk];
 % looping over the N steps
 for ii = 1:N
-    f0 = sys.systemDynamics([],xrefk,urefk);
-    [A,B] = sys.discretizeLinearizeQuadrotor(Ts, xrefk,urefk);
+    f0 = sys.systemDynamics([],xrefk(:,ii),urefk(:,ii));
+    [A,B] = sys.discretizeLinearizeQuadrotor(Ts, xrefk(:,ii),urefk(:,ii));
     constraints = [constraints,...
-            x(:,ii+1) == f0 + A*(x(:,ii)-xrefk)+B*(u(:,ii)-urefk),... % dynamics
+            x(:,ii+1) == f0 + A*(x(:,ii)-xref(:,ii))+B*(u(:,ii)-uref(:,ii)),... % dynamics
             sys.Fmin*ones(sys.nAct,1) <= u(:,ii), u(:,ii) <= sys.Fmax*ones(sys.nAct,1),... % input constraints
             ];
 	% cost function
     cost = cost ...
-        + (x(:,ii)-xrefk)'*Q*(x(:,ii)-xrefk)...
-        + (u(:,ii)-urefk)'*R*(u(:,ii)-urefk);
+        + (x(:,ii)-xref(:,ii))'*Q*(x(:,ii)-xref(:,ii))...
+        + (u(:,ii)-uref(:,ii))'*R*(u(:,ii)-uref(:,ii));
 end   
 % terminal cost
-cost = cost + (x(:,N+1)-xrefk)'*P*(x(:,N+1)-xrefk);
+cost = cost + (x(:,N+1)-xref(:,N+1))'*P*(x(:,N+1)-xref(:,N+1));
+
+% reference constraints
+for ij = 1:N+1
+constraints = [constraints,...
+                xref(:,ij)==xrefk(:,ij),...
+                uref(:,ij)==urefk(:,ij)];
+end
 
 %% solving 
 options = sdpsettings('verbose', false, 'solver', 'quadprog');

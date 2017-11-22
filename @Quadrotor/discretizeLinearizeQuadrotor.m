@@ -19,5 +19,6 @@ else
     Ad = exponMat(1:size(A,1),1:size(A,2));
     Bd = exponMat(1:size(B,1),(size(A,2)+1):(size(A,2)+size(B,2)));
 end
+
 end
 
