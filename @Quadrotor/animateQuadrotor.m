@@ -92,18 +92,19 @@ if(opts.vid.MAKE_MOVIE)
     time = 0;
 end
 
-hist = 50 ;
+hist = 5000 ;
 
     for i=1:length(t)
         drawQuadrotor(axes1, x(i,:)');
         
         plot(x(max(1,i-hist):i, 1), x(max(1,i-hist):i, 2), 'k') ;
         if xd_flag
-            plot(xd(max(1,i-hist):i, 1), xd(max(1,i-hist):i, 2), 'og','linewidth',6) ;
+            l = plot(xd(max(1,i-hist):i, 1), xd(max(1,i-hist):i, 2), 'og','linewidth',6);
+            l.Color(4) = 0.4;
         end
     %         plot3(x(max(1,i-hist):i, 1)-L*x(max(1,i-hist):i,7), x(max(1,i-hist):i, 2)-L*x(max(1,i-hist):i,8), x(max(1,i-hist):i, 3)-L*x(max(1,i-hist):i,9), 'r') ;
             s = sprintf('Running\n t = %1.2fs \n 1/%d realtime speed',t(i), RATE/25);
-            text(x(i,1)-1.3,x(i,2)+2.4,s,'FontAngle','italic','FontWeight','bold');
+            text(x(i,1)-1.5,x(i,2)+1.5,s,'FontAngle','italic','FontWeight','bold');
         drawnow;
         figure_x_limits_ = figure_x_limits+x(i,1);
         figure_y_limits_ = figure_y_limits+x(i,2);

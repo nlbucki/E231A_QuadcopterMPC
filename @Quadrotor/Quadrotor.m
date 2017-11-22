@@ -86,12 +86,16 @@ methods
         [A, B] = quadrotorLinearDynamics(x0, u0, params);
     end
     
-    function ddx = systemDynamics(obj, t, x)
-        
-        u = obj.controller(obj, t,x);
-        [fvec, gvec] = obj.quadVectorFields(x);
-        ddx = fvec + gvec*u;
-        
+    function ddx = systemDynamics(obj, t, x, varargin)
+        if nargin > 3
+           u = varargin{1};
+           [fvec, gvec] = obj.quadVectorFields(x);
+           ddx = fvec + gvec*u;                        
+        else
+           u = obj.controller(obj, t,x);
+           [fvec, gvec] = obj.quadVectorFields(x);
+           ddx = fvec + gvec*u; 
+        end
     end
     
     function u = calcControlInput(obj, t, x)

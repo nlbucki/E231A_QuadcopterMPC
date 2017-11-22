@@ -25,7 +25,7 @@ uref = [sys.mQ*sys.g/2;
     sys.mQ*sys.g/2];
 
 %% Initial condition
-x0 = [-.5;-.5;0;0;0;0];
+x0 = [-5;-5;0;0;0;0];
 
 %% MPC 
 % params
@@ -35,7 +35,7 @@ params.mpc.M = params.mpc.Tf/params.mpc.Ts;
 params.mpc.N = 10;
 
 params.mpc.Q = 100*eye(sys.nDof);
-params.mpc.R = 1*eye(sys.nAct);
+params.mpc.R = 0.1*eye(sys.nAct);
 params.mpc.P = params.mpc.Q;    
 
 % system response
@@ -45,16 +45,17 @@ sys_resp.x(:,1) = x0;
 
 % calculating input over the loop
 for impc = 1:params.mpc.M
-    fprintf('loop %d\n',impc);
+    static_disp('loop %d\n',impc);
     
     % optimizing for input
     xk = sys_resp.x(:,impc);
-    ctlx = solve_for_cftoc(xk,xref,uref,sys,params);
+    ctlk = solve_for_cftoc(xk,xref,uref,sys,params);
     
     % forward simulation
+    f0 = sys.systemDynamics([],xref,uref);
     [A,B] = sys.discretizeLinearizeQuadrotor(params.mpc.Ts, xref,uref);
-    u = ctlx.uOpt(:,1);
-    sys_resp.x(:,impc+1) = A*xk+B*u;
+    u = ctlk.uOpt(:,1);
+    sys_resp.x(:,impc+1) = f0 + A*(xk-xref)+B*(u-uref);
     sys_resp.u(:,impc) = u;
 end
 
