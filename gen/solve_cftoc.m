@@ -35,7 +35,8 @@ for ii = 1:N
     [A,B] = sys.discretizeLinearizeQuadrotor(Ts, xrefk(:,ii),urefk(:,ii));
     constraints = [constraints,...
             x(:,ii+1) == f0 + A*(x(:,ii)-xref(:,ii))+B*(u(:,ii)-uref(:,ii)),... % dynamics
-            sys.Fmin*ones(sys.nAct,1) <= u(:,ii), u(:,ii) <= sys.Fmax*ones(sys.nAct,1),... % input constraints
+            sys.bounds.inputs.lb <= u(:,ii), u(:,ii) <= sys.bounds.inputs.ub,... % input constraints
+            sys.bounds.states.lb <= x(:,ii), x(:,ii) <= sys.bounds.states.ub... % state constraints
             ];
 	% cost function
     cost = cost ...
@@ -47,9 +48,9 @@ cost = cost + (x(:,N+1)-xref(:,N+1))'*P*(x(:,N+1)-xref(:,N+1));
 
 % reference constraints
 for ij = 1:N+1
-constraints = [constraints,...
-                xref(:,ij)==xrefk(:,ij),...
-                uref(:,ij)==urefk(:,ij)];
+    constraints = [constraints,...
+                    xref(:,ij)==xrefk(:,ij),...
+                    uref(:,ij)==urefk(:,ij)];
 end
 
 %% solving 
