@@ -34,7 +34,7 @@ params.mpc.P = params.mpc.Q;
 
 %% Load reference trajectory
 % fixed point reference trajectory
-waypoint = [0;0;0;0;0;0];
+waypoint = [5;5;0;0;0;0];
 xref = repmat(waypoint,1,(params.mpc.M+params.mpc.N));
 uref = (sys.mQ*sys.g/2)*ones(2,params.mpc.M+params.mpc.N);
 
@@ -94,11 +94,43 @@ end
 %% plots
 time = 0:params.mpc.Ts:params.mpc.Tf;
 figure
-plot(time', sys_response.x');
-legend('y','z', 'phi', 'dy', 'dz', 'dphi');
+subplot(2,3,1);
+plot(time', sys_response.x(1,:)');
+title('y');
 xlabel('time (s)');
-ylabel('states');
+ylabel('m');
 grid on; grid minor;
+subplot(2,3,2);
+plot(time', sys_response.x(2,:)');
+title('z');
+xlabel('time (s)');
+ylabel('m');
+grid on; grid minor;
+subplot(2,3,3);
+plot(time', (180/pi)*sys_response.x(3,:)');
+title('phi');
+xlabel('time (s)');
+ylabel('degrees');
+grid on; grid minor;
+subplot(2,3,4);
+plot(time', sys_response.x(4,:)');
+title('dy');
+xlabel('time (s)');
+ylabel('m/s');
+grid on; grid minor;
+subplot(2,3,5);
+plot(time', sys_response.x(5,:)');
+title('dz');
+xlabel('time (s)');
+ylabel('m/s');
+grid on; grid minor;
+subplot(2,3,6);
+plot(time', sys_response.x(6,:)');
+title('dphi');
+xlabel('time (s)');
+ylabel('rad/s');
+grid on; grid minor;
+
 
 figure;
 plot(sys_response.x(1,:),sys_response.x(2,:),'r','linewidth',2);
