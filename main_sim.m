@@ -19,9 +19,12 @@ sys.controller = @controller_dlqr_path;
 
 
 %% Generate obstacle avoiding trajectory
-traj_gen_QR_pointmass(sys)
+traj = traj_gen_QR_pointmass(sys);
 %% Generate trajectory to track
-load trajectory
+% load trajectory
+time = traj.t;
+states = traj.x;
+control = traj.u;
 sys.controlParams = struct('time',time,'states',states,'control',control);
 
 
