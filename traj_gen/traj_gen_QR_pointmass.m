@@ -67,7 +67,7 @@ options = sdpsettings('verbose', 1, 'solver', 'IPOPT');
 opt = optimize(constr, cost, options);
 % Assign output variables
 % traj.t = cumsum(value(Topt));
-traj.t = 0:Topt:N*Topt;
+traj.t = 0:value(Topt):N*value(Topt);
 traj.u = value(u);
 traj.x = value(x);
 if opt.problem ~= 0
