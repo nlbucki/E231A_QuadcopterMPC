@@ -14,7 +14,6 @@ properties
 
     controller@function_handle
     controlParams@struct
-
     
     % TODO: Add hanging load
 %     mL@double

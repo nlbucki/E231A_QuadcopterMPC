@@ -1,6 +1,6 @@
 
 %% Add paths
-user = 'david';
+user = 'nathan';
 % addpath(genpath([pwd, '/@Quadrotor']));
 addpath(genpath([pwd, '/controllers/']));
 addpath(genpath([pwd, '/gen/']));
@@ -13,8 +13,11 @@ close all
 %% Build quadrotor system
 params = struct;
 sys = Quadrotor(params);
-sys.controller = @controller_dlqr;
+sys.controller = @controller_dlqr_path;
 
+%% Generate trajectory to track
+load trajectory
+sys.controlParams = struct('time',time,'states',states,'control',control);
 
 %% Simulate System
 solver = @ode45;
