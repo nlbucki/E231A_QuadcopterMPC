@@ -33,10 +33,15 @@ params.mpc.R = 0.001*eye(sys.nAct);
 params.mpc.P = params.mpc.Q;    
 
 %% Load reference trajectory
+
+load('trajectory.mat');
+tref = linspace(time(1),time(end),params.mpc.M+params.mpc.N);
+xref = interp1(time,control,tref);
+
 % fixed point reference trajectory
-waypoint = [5;5;0;0;0;0];
-xref = repmat(waypoint,1,(params.mpc.M+params.mpc.N));
-uref = (sys.mQ*sys.g/2)*ones(2,params.mpc.M+params.mpc.N);
+% waypoint = [5;5;0;0;0;0];
+% xref = repmat(waypoint,1,(params.mpc.M+params.mpc.N));
+% uref = (sys.mQ*sys.g/2)*ones(2,params.mpc.M+params.mpc.N);
 
 % waypoints
 % xref = [zeros(sys.nDof,floor(params.mpc.M/2)), repmat([5;5;0;0;0;0],1,params.mpc.M+params.mpc.N-floor(params.mpc.M/2))];
