@@ -26,7 +26,7 @@ end
 methods
 	
 	% class constructor
-	function obj = QuadrotorLoad(params)
+	function obj = Quadrotorload(params)
         
         if isfield(params, 'mQ')
             obj.mQ = params.mQ;

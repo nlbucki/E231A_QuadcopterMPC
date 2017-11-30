@@ -13,6 +13,7 @@ properties
 
     controller@function_handle
     controlParams@struct
+
 end
 
 properties (Constant = true)
