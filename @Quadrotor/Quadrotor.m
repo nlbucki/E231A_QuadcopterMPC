@@ -1,7 +1,6 @@
 classdef Quadrotor
-%fdasf
+
 properties
-    
     mQ@double
     JQ@double
     lQ@double
@@ -14,9 +13,6 @@ properties
 
     controller@function_handle
     controlParams@struct
-    
-    % TODO: Add hanging load
-%     mL@double
 
 end
 
@@ -24,8 +20,8 @@ properties (Constant = true)
     nDof = 6;
     nAct = 2;
 end
+
 methods
-	
 	% class constructor
 	function obj = Quadrotor(params)
         
@@ -97,7 +93,10 @@ methods
         u = obj.controller(obj, t,x);
     end
     
-    [A, B] = discretizeLinearizeQuadrotor(obj, Ts, xk, uk);
+    function [Ad, Bd] = discrLinearizeQuadrotor(obj, Ts, xk, uk)
+        [Ad, Bd] = discretizeLinearizeQuadrotor(obj, Ts, xk, uk);
+    end
+    
     % TODO:
 %     obj = setLoadMass(mL); 
 

@@ -5,6 +5,8 @@ user = 'nathan';
 addpath(genpath([pwd, '/controllers/']));
 addpath(genpath([pwd, '/gen/']));
 
+addpath(genpath([pwd, '/traj_gen/']));
+
 %% Reset workspace
 clear
 clc
@@ -15,9 +17,13 @@ params = struct;
 sys = Quadrotor(params);
 sys.controller = @controller_dlqr_path;
 
+
+%% Generate obstacle avoiding trajectory
+traj_gen_QR_pointmass(sys)
 %% Generate trajectory to track
 load trajectory
 sys.controlParams = struct('time',time,'states',states,'control',control);
+
 
 %% Simulate System
 solver = @ode45;
