@@ -35,15 +35,19 @@ params.mpc.P = params.mpc.Q;
 %% Load reference trajectory
 
 load('trajectory.mat');
-tref = linspace(time(1),time(end),params.mpc.M+params.mpc.N);
-xref = interp1(time,control,tref);
+tref =  time(1):params.mpc.Ts:time(end);
+uref = [interp1(time',control',tref','spline')]';
+xref = [interp1(time',states',tref','spline')]';
+
 
 % fixed point reference trajectory
-% waypoint = [5;5;0;0;0;0];
+% --------------------------------
+% waypoint = [1;1;0;0;0;0];
 % xref = repmat(waypoint,1,(params.mpc.M+params.mpc.N));
 % uref = (sys.mQ*sys.g/2)*ones(2,params.mpc.M+params.mpc.N);
 
 % waypoints
+% --------
 % xref = [zeros(sys.nDof,floor(params.mpc.M/2)), repmat([5;5;0;0;0;0],1,params.mpc.M+params.mpc.N-floor(params.mpc.M/2))];
 % uref = (sys.mQ*sys.g/2)*ones(2,params.mpc.M+params.mpc.N);
 
@@ -82,7 +86,8 @@ for impc = 1:params.mpc.M
     
     % optimizing for input
     xk = sys_response.x(:,impc);
-    xrefk = xref(:,impc:(impc+params.mpc.N));
+%     xrefk = xref(:,impc:(impc+params.mpc.N));
+    xrefk = [xref(:,impc), repmat(xref(:,impc+1),1,params.mpc.N)];
     urefk = uref(:,impc:(impc+params.mpc.N));
     ctlk = solve_cftoc(xk,xrefk,urefk,sys,params);
     

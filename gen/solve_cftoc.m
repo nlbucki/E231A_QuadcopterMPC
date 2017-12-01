@@ -53,10 +53,11 @@ for ij = 1:N+1
                     uref(:,ij)==urefk(:,ij)];
 end
 
-%% solving 
+%% optimization
 options = sdpsettings('verbose', false, 'solver', 'quadprog');
 sol = optimize(constraints,cost,options);
 
+%% 
 if sol.problem == 0
     ctl.feas = true;
     ctl.xOpt = double(x);

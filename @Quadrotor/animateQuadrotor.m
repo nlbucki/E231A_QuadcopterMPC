@@ -7,11 +7,13 @@ opts_default.t = [];
 opts_default.x = [];
 opts_default.xd = [0;0];
 opts_default.td = [];
+opts_default.interp_type = 'spline';
 
 opts_default.vid.MAKE_MOVIE = 0;
 opts_default.vid.filename = 'results/vid1';
 opts_default.vid.Quality = 100;
 opts_default.vid.FrameRate = 24;
+
 
 % initialize the animation figure and axes
     figure_x_limits = [-2 2];
@@ -70,14 +72,14 @@ opts_default.vid.FrameRate = 24;
     end
     box on;
     
-    [t, x] = even_sample(t, x, RATE);
+    [t, x] = even_sample(t, x, RATE,opts.interp_type);
     t = t+t(1);    
     
     xd_flag = true;
     if length(xd) == 2
        xd = repmat(xd',length(x),1);
     else
-       [~, xd] = even_sample(td,xd,RATE); 
+       [~, xd] = even_sample(td,xd,RATE,opts.interp_type); 
     end
 
 if(opts.vid.MAKE_MOVIE)
