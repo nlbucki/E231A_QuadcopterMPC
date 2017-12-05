@@ -1,4 +1,4 @@
-function traj = traj_gen_QR(obj)
+function traj = traj_gen_QR_pointmass(obj)
 % FUNCTION INPUTS:
 x0 = [-10.5;-10.5;0;0;0;0];
 xF = [0;0;0;0;0;0];
@@ -10,14 +10,14 @@ N = 80;
 
 % Generate obstacle
 % LATER: FUNCTION INPUT
-O = Polyhedron('V',[-1 1; -20 1; -1 -2; -20 -2]);
+O = {Polyhedron('V',[-1 1; -20 1; -1 -2; -20 -2]),Polyhedron('V',[2 -1; 2 -10; 6 -1; 6 -10])};
 
 %% Generate optimization problem
 
 M = length(O);              % number of obstacles
 numConstrObs = zeros(1,M);  % number of constraints to define each obstacle
 for m=1:M
-    numConstrObs(m) = size(O(m).H,1);
+    numConstrObs(m) = size(O{m}.H,1);
 end
 nx = length(xF);        % number of states
 nu = length(uU);        % number of inputs
@@ -38,7 +38,7 @@ lambda = sdpvar(sum(numConstrObs),N);   % dual variables corresponding to
 q1 = 50;                % cost per time unit
 q2 = 100;
 R = eye(nu);            % cost for control inputs
-dmin = 1;             % minimum safety distance
+dmin = 0.3;             % minimum safety distance
 cost = 0;
 constr = [x(:,1)==x0, x(:,N+1)==xF];
 for k = 1:N
@@ -56,8 +56,8 @@ for k = 1:N
     for m=1:M
         lda = lambda(sum(numConstrObs(1:m-1))+1:sum(numConstrObs(1:m)),k);
         constr = [constr, ...
-            (O.H(:,1:2)*x(1:2,k)-O.H(:,2+1))'*lda>=dmin, ...
-            sum((O.H(:,1:2)'*lda).^2)<=1, ...
+            (O{m}.H(:,1:2)*x(1:2,k)-O{m}.H(:,2+1))'*lda>=dmin, ...
+            sum((O{m}.H(:,1:2)'*lda).^2)<=1, ...
             lda>=zeros(size(lda))];
     end
 end
@@ -84,7 +84,9 @@ xlabel('y')
 ylabel('z')
 title('Generated path with obstacle avoidance')
 hold on
-plot(O,'alpha',0.5)
+for m=1:M
+    plot(O{m},'alpha',0.5)
+end
 
 % Display the amount of time the planned motion would take
 disp(['Reaching the target takes ' num2str(traj.t(end)) 's.'])
