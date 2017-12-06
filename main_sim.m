@@ -1,7 +1,7 @@
 
 %% Add paths
 user = 'nathan';
-% addpath(genpath([pwd, '/@Quadrotor']));
+% addpath(genpath([pwd, '/@Quadrotorload']));
 addpath(genpath([pwd, '/controllers/']));
 addpath(genpath([pwd, '/gen/']));
 
@@ -14,12 +14,12 @@ close all
 
 %% Build quadrotor system
 params = struct;
-sys = Quadrotor(params);
+sys = Quadrotorload(params);
 sys.controller = @controller_dlqr_path;
 
 
 %% Generate obstacle avoiding trajectory
-traj = traj_gen_QR_pointmass(sys);
+traj = traj_gen_QRL_polyhedron(sys);
 %% Generate trajectory to track
 % load trajectory
 time = traj.t;
