@@ -43,9 +43,9 @@ methods
             obj.JQ = obj.mQ*obj.lQ^2;
         end
         
-        if isfield(params, 'lQ')
-			obj.lQ = params.lQ;
-        end
+%         if isfield(params, 'lQ')
+% 			obj.lQ = params.lQ;
+%         end
         
         if isfield(params, 'g')
             obj.g = params.g;

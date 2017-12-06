@@ -46,9 +46,9 @@ methods
             obj.JQ = obj.mQ*obj.lQ^2;
         end
         
-        if isfield(params, 'lQ')
-			obj.lQ = params.lQ;
-        end
+%         if isfield(params, 'lQ')
+% 			obj.lQ = params.lQ;
+%         end
         
         if isfield(params, 'g')
             obj.g = params.g;
@@ -85,13 +85,13 @@ methods
     
     function [f, g] = quadVectorFields(obj, x)
 %         params = [mQ;JQ;lQ;g];
-        params = [obj.mQ;obj.JQ;obj.lQ;obj.g];
+        params = [obj.mQ;obj.JQ;obj.lQ;obj.mL;obj.l;obj.g];
         [f,g] = quadrotorloadVectorFields(x,params);
     end
     
     function [A, B] = linearizeQuadrotor(obj, x0, u0)
 %         params = [mQ;JQ;lQ;g];
-        params = [obj.mQ;obj.JQ;obj.lQ;obj.g];
+        params = [obj.mQ;obj.JQ;obj.lQ;obj.mL;obj.l;obj.g];
         [A, B] = quadrotorloadLinearDynamics(x0, u0, params);
     end
     
