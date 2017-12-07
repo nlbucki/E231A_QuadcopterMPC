@@ -18,7 +18,7 @@ fvec = [dyL;
         dphiQ;
         (-mQ/(mQ+mL))*l*dphiL^2*sin(phiL);
         (mQ/(mQ+mL))*l*dphiL^2*cos(phiL)-g;
-        sin(phiQ-phiL)/mQ;
+        sin(phiQ-phiL)/(mQ*l);
         0];
 
 gvec = [zeros(4,2);
