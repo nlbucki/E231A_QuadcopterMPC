@@ -1,5 +1,5 @@
 function [Ad, Bd] = discretizeLinearizeQuadrotor(obj, Ts, xk, uk)
-% This function discretizes and lienarizes the quadrotor system dynamics to
+% This function discretizes and linearizes the quadrotor system dynamics to
 % the form
 % x(k+1) = Ad*x(k) + Bd*u(k).
 
@@ -19,5 +19,6 @@ else
     Ad = exponMat(1:size(A,1),1:size(A,2));
     Bd = exponMat(1:size(B,1),(size(A,2)+1):(size(A,2)+size(B,2)));
 end
+
 end
 

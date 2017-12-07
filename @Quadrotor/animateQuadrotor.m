@@ -7,15 +7,17 @@ opts_default.t = [];
 opts_default.x = [];
 opts_default.xd = [0;0];
 opts_default.td = [];
+opts_default.interp_type = 'spline';
 
 opts_default.vid.MAKE_MOVIE = 0;
 opts_default.vid.filename = 'results/vid1';
 opts_default.vid.Quality = 100;
 opts_default.vid.FrameRate = 24;
 
+
 % initialize the animation figure and axes
-    figure_x_limits = [-3 3];
-    figure_y_limits = [-3 3];
+    figure_x_limits = [-2 2];
+    figure_y_limits = [-2 2];
     figure_z_limits = [0 1] ;
     fig1 = figure;
 
@@ -70,14 +72,14 @@ opts_default.vid.FrameRate = 24;
     end
     box on;
     
-    [t, x] = even_sample(t, x, RATE);
+    [t, x] = even_sample(t, x, RATE,opts.interp_type);
     t = t+t(1);    
     
     xd_flag = true;
     if length(xd) == 2
        xd = repmat(xd',length(x),1);
     else
-       [~, xd] = even_sample(td,xd,RATE); 
+       [~, xd] = even_sample(td,xd,RATE,opts.interp_type); 
     end
 
 if(opts.vid.MAKE_MOVIE)
@@ -92,18 +94,19 @@ if(opts.vid.MAKE_MOVIE)
     time = 0;
 end
 
-hist = 50 ;
+hist = 5000 ;
 
     for i=1:length(t)
         drawQuadrotor(axes1, x(i,:)');
         
         plot(x(max(1,i-hist):i, 1), x(max(1,i-hist):i, 2), 'k') ;
         if xd_flag
-            plot(xd(max(1,i-hist):i, 1), xd(max(1,i-hist):i, 2), 'og','linewidth',12) ;
+            l = plot(xd(max(1,i-hist):i, 1), xd(max(1,i-hist):i, 2), 'og','linewidth',6);
+            l.Color(4) = 0.4;
         end
     %         plot3(x(max(1,i-hist):i, 1)-L*x(max(1,i-hist):i,7), x(max(1,i-hist):i, 2)-L*x(max(1,i-hist):i,8), x(max(1,i-hist):i, 3)-L*x(max(1,i-hist):i,9), 'r') ;
             s = sprintf('Running\n t = %1.2fs \n 1/%d realtime speed',t(i), RATE/25);
-            text(x(i,1)-1.3,x(i,2)+2.4,s,'FontAngle','italic','FontWeight','bold');
+            text(x(i,1)-1.5,x(i,2)+1.5,s,'FontAngle','italic','FontWeight','bold');
         drawnow;
         figure_x_limits_ = figure_x_limits+x(i,1);
         figure_y_limits_ = figure_y_limits+x(i,2);

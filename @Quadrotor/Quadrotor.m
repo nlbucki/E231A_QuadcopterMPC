@@ -10,6 +10,9 @@ properties
     Fmax@double
     Mmin@double
     Mmax@double
+    
+    % bounds
+    bounds@struct
 
     controller@function_handle
     controlParams@struct
@@ -23,7 +26,7 @@ end
 
 methods
 	% class constructor
-	function obj = Quadrotor(params)
+	function obj = Quadrotor(params,varargin)
         
         if isfield(params, 'mQ')
             obj.mQ = params.mQ;
@@ -52,9 +55,25 @@ methods
         else
             obj.g = 9.81;
         end
+        
+        obj.type = 'quadrotor';
+        
+        if nargin > 1
+            obj.bounds = varargin{1};
+        else 
+            % input bounds
+            bounds.inputs.lb = [0; 0];
+            bounds.inputs.ub = [2*obj.mQ*obj.g; 2*obj.mQ*obj.g]; % --> *2bUpdated*
+            
+        	% state bounds 
+            bounds.states.lb = [-100; -100; -pi/3; -100; -100; -100];
+            bounds.states.ub = [100; 100; pi/3; 100; 100; 100];
+            
+            obj.bounds = bounds;
+        end
                 
     end     
-    
+%%    
     % set property values
     function obj = setProperty(obj, propertyName, value)
         if isprop(obj, propertyName)
@@ -81,27 +100,28 @@ methods
         [A, B] = quadrotorLinearDynamics(x0, u0, params);
     end
     
-    function ddx = systemDynamics(obj, t, x)
-        
-        u = obj.controller(obj, t,x);
-        [fvec, gvec] = obj.quadVectorFields(x);
-        ddx = fvec + gvec*u;
-        
+    function ddx = systemDynamics(obj, t, x, varargin)
+        if nargin > 3
+           u = varargin{1};
+           [fvec, gvec] = obj.quadVectorFields(x);
+           ddx = fvec + gvec*u;                        
+        else
+           u = obj.controller(obj, t,x);
+           [fvec, gvec] = obj.quadVectorFields(x);
+           ddx = fvec + gvec*u; 
+        end
     end
     
     function u = calcControlInput(obj, t, x)
         u = obj.controller(obj, t,x);
     end
-    
+
     function [Ad, Bd] = discrLinearizeQuadrotor(obj, Ts, xk, uk)
         [Ad, Bd] = discretizeLinearizeQuadrotor(obj, Ts, xk, uk);
     end
-    
-    % TODO:
-%     obj = setLoadMass(mL); 
 
     % animation
-    animateQuadrotor(obj,t,x,varargin)
+    animateQuadrotor(obj,opts_in);
     
     
 end
