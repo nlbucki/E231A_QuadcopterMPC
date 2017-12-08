@@ -56,8 +56,6 @@ methods
             obj.g = 9.81;
         end
         
-        obj.type = 'quadrotor';
-        
         if nargin > 1
             obj.bounds = varargin{1};
         else 

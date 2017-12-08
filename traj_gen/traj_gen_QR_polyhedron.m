@@ -116,7 +116,7 @@ axis equal
 figure
 plot(traj.t,traj.x)
 title('States vs. time')
-legend('y_L','z_L','\phi_L','\phi_Q','yd_L','zd_L','\phi d_L','\phi d_Q')
+legend('y_Q','z_Q','\phi_Q','yd_Q','zd_Q','\phi d_Q')
 
 figure
 plot(traj.t(1:end-1),traj.u)
