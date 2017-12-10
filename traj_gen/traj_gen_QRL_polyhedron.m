@@ -2,17 +2,22 @@ function traj = traj_gen_QRL_polyhedron(obj)
 % FUNCTION INPUTS:
 x0 = [-10.5;-10.5;0;0;0;0;0;0];
 xF = [0;0;0;0;0;0;0;0];
-%% constrain x (especially angles) for real implementation
-xU = inf(8,1);
+% xU = inf(8,1);
+xU = [15; 15; pi/2; pi/2; inf; inf; inf; inf];    % last two might be defined smarter
 xL = -xU;
-uU = 15*ones(2,1);  % at least 10 to be able to compensate gravity
-uL = zeros(2,1);
+uU = [obj.Fmax; obj.Mmax];
+uL = [obj.Fmin; obj.Mmin];
 N = 80;
+
+% initial guess
+xinit = zeros(length(xF),N+1);
+xinit(1,:) = linspace(x0(1),xF(1),N+1);
+xinit(2,:) = linspace(x0(2),xF(2),N+1);
 
 QR_width = obj.wQ;
 QR_height = obj.hQ;
 % cable_d = 0.002;
-load_d = obj.wL;
+load_r = obj.wL;
 
 
 % Generate obstacle
@@ -25,11 +30,11 @@ QR = Polyhedron('V',[-QR_width/2 0; QR_width/2 0; -QR_width/2 QR_height;...
     QR_width/2 QR_height]);
 % C = Polyhedron('V',[-cable_d/2 0; cable_d/2 0; -cable_d/2 obj.l; ...
 %     cable_d/2 obj.l]);
-% L = Polyhedron('V',[-load_d -load_d; load_d -load_d; -load_d load_d; ...
-%     load_d load_d]);
+% L = Polyhedron('V',[-load_r -load_r; load_r -load_r; -load_r load_r; ...
+%     load_r load_r]);
 % Load with cable (box around both) - less constraints for faster run time
-L = Polyhedron('V',[-load_d -load_d; load_d -load_d; -load_d obj.l; ...
-    load_d obj.l]);
+L = Polyhedron('V',[-load_r -load_r; load_r -load_r; -load_r obj.l; ...
+    load_r obj.l]);
 
 %% Generate optimization problem
 
@@ -46,6 +51,7 @@ nu = length(uU);        % number of inputs
 
 % Define optimization variables
 x = sdpvar(nx, N+1);    % states
+assign(x,xinit);
 u = sdpvar(nu, N);      % control inputs
 % Topt = sdpvar(1,N);     % optimal timestep variable over horizon
 Topt = sdpvar(1,1);
@@ -115,7 +121,7 @@ for k = 1:N
 end
 
 % Specify solver and solve the optimization problem
-options = sdpsettings('verbose', 1, 'solver', 'IPOPT');
+options = sdpsettings('verbose', 1, 'solver', 'IPOPT','usex0',1);
 opt = optimize(constr, cost, options);
 % Assign output variables
 % traj.t = cumsum(value(Topt));

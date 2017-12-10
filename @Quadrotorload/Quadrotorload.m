@@ -85,6 +85,30 @@ methods
         else
             obj.wL = 0.05;
         end
+        
+        if isfield(params, 'Fmin')
+			obj.Fmin = params.Fmin;
+        else
+            obj.Fmin = 0;
+        end
+        
+        if isfield(params, 'Fmax')
+			obj.Fmax = params.Fmax;
+        else
+            obj.Fmax = obj.g*(obj.mQ+obj.mL)*10;
+        end
+        
+        if isfield(params, 'Mmin')
+			obj.Mmin = params.Mmin;
+        else
+            obj.Mmin = -obj.lQ*obj.Fmax;
+        end
+        
+        if isfield(params, 'Mmax')
+			obj.Mmax = params.Mmax;
+        else
+            obj.Mmax = obj.lQ*obj.Fmax;
+        end
     end     
     
     % set property values
