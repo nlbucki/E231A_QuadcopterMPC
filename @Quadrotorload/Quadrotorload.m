@@ -5,6 +5,9 @@ properties
     mQ@double
     JQ@double
     lQ@double
+    hQ@double   % max. height QR
+    wQ@double   % max. width QR
+    
     g@double
 
     Fmin@double
@@ -17,6 +20,7 @@ properties
 
     mL@double
     l@double
+    wL@double   % max. width load (assumed to be height as well)
 end
 
 properties (Constant = true)
@@ -37,7 +41,7 @@ methods
         if isfield(params, 'lQ')
             obj.lQ = params.lQ;
         else
-            obj.lQ = 0.01;
+            obj.lQ = 0.075;
         end
         
         if isfield(params, 'JQ')	
@@ -46,9 +50,17 @@ methods
             obj.JQ = obj.mQ*obj.lQ^2;
         end
         
-%         if isfield(params, 'lQ')
-% 			obj.lQ = params.lQ;
-%         end
+        if isfield(params, 'hQ')
+			obj.hQ = params.hQ;
+        else
+            obj.hQ = 0.05;
+        end
+        
+        if isfield(params, 'wQ')
+			obj.wQ = params.wQ;
+        else
+            obj.wQ = 0.2;
+        end
         
         if isfield(params, 'g')
             obj.g = params.g;
@@ -66,6 +78,12 @@ methods
             obj.l = params.l;
         else
             obj.l = 0.25;
+        end
+        
+        if isfield(params, 'wL')
+			obj.wL = params.wL;
+        else
+            obj.wL = 0.05;
         end
     end     
     

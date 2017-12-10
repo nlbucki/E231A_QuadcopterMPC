@@ -9,10 +9,10 @@ uU = 15*ones(2,1);  % at least 10 to be able to compensate gravity
 uL = zeros(2,1);
 N = 80;
 
-QR_width = 2*0.02;
-QR_height = 0.015;
+QR_width = obj.wQ;
+QR_height = obj.hQ;
 % cable_d = 0.002;
-load_d = 0.005;
+load_d = obj.wL;
 
 
 % Generate obstacle
@@ -68,7 +68,7 @@ Rot = @(angle) [cos(angle) -sin(angle); sin(angle) cos(angle)];
 q1 = 50;                % cost per time unit
 q2 = 100;
 R = eye(nu);            % cost for control inputs
-dmin = 0.3;             % minimum safety distance
+dmin = 0.6;             % minimum safety distance
 cost = 0;
 constr = [x(:,1)==x0, x(:,N+1)==xF];
 for k = 1:N
