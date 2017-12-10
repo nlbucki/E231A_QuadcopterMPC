@@ -11,9 +11,11 @@ e3 = [0;1]
 R = [cos(phiQ) -sin(phiQ); 
     sin(phiQ) cos(phiQ)];
 
+fvec = f*R*e3
 F = dot(p,f*R*e3);
 
 rhs = simplify((F-mQ*L*dp_dot_dp)*p)
+
 
 
 
