@@ -23,7 +23,7 @@ act_sys = sys;
 
 %% MPC params
 % params
-params.mpc.Tf = 10;
+params.mpc.Tf = 100;
 params.mpc.Ts = .1;
 params.mpc.M = params.mpc.Tf/params.mpc.Ts;
 params.mpc.N = 10;
@@ -37,8 +37,16 @@ params.mpc.P = params.mpc.Q;
 load('trajectory.mat');
 tref =  time(1):params.mpc.Ts:time(end);
 uref = [interp1(time',control',tref','spline')]';
-xref = [interp1(time',states',tref','spline')]';
+xref = [interp1(time',states',tref','linear')]';
 
+figure
+plot(time,states(1,:),'r',tref,xref(1,:),'*b'); hold on
+plot(time,states(2,:),':r',tref,xref(2,:),'sb');
+figure;
+subplot(2,1,1);
+plot(time,control(1,:),'r',tref,uref(1,:),'b'); grid on;grid minor
+subplot(2,1,2);
+plot(time,control(2,:),'r',tref,uref(2,:),'b');grid on; grid minor
 
 % fixed point reference trajectory
 % --------------------------------
@@ -52,6 +60,16 @@ xref = [interp1(time',states',tref','spline')]';
 % uref = (sys.mQ*sys.g/2)*ones(2,params.mpc.M+params.mpc.N);
 
 % [xref, uref] = generate_ref_trajectory(sys,params.mpc);
+
+% circular trajectory
+% -------------------
+% tref = [0:params.mpc.Ts:params.mpc.Tf];
+% xf = @(t) [sin(2*pi*0.01*t);0;0;0;0;0];
+% xref = [];
+% for i = 1:length(tref)
+%     xref = [xref,xf(tref(i))];
+% end
+% uref = (sys.mQ*sys.g/2)*ones(2,params.mpc.M+params.mpc.N);
 
 %% Testing the generated reference trajectory
 % time = 0:params.mpc.Ts:params.mpc.Tf;
@@ -71,8 +89,8 @@ xref = [interp1(time',states',tref','spline')]';
 % sys.animateQuadrotor(opts);
 
 %% Initial condition
-x0 = [-1.5;-1.5;0;0;0;0];
-% x0  = xref(:,1);
+% x0 = [-1.5;-1.5;0;0;0;0];
+x0  = xref(:,1);
 
 %% Control 
 % system response
@@ -82,13 +100,14 @@ sys_response.x(:,1) = x0;
 
 % calculating input over the loop
 for impc = 1:params.mpc.M
-    static_disp('calculting input for T = %.4f\n',impc*params.mpc.Ts);
+%     static_disp('calculting input for T = %.4f\n',impc*params.mpc.Ts);
     
     % optimizing for input
     xk = sys_response.x(:,impc);
 %     xrefk = xref(:,impc:(impc+params.mpc.N));
     xrefk = [xref(:,impc), repmat(xref(:,impc+1),1,params.mpc.N)];
-    urefk = uref(:,impc:(impc+params.mpc.N));
+%     urefk = uref(:,impc:(impc+params.mpc.N));
+    urefk = repmat(uref(:,impc),1,params.mpc.N+1);
     ctlk = solve_cftoc(xk,xrefk,urefk,sys,params);
     
     % forward simulation
