@@ -18,13 +18,13 @@ fvec = [dyL;
         dphiQ;
         (-mQ/(mQ+mL))*l*dphiL^2*sin(phiL);
         (mQ/(mQ+mL))*l*dphiL^2*cos(phiL)-g;
-        sin(phiQ-phiL)/(mQ*l);
+        0;
         0];
 
 gvec = [zeros(4,2);
     -(sin(phiL)/(mQ+mL))*cos(phiQ-phiL), 0;
     (cos(phiL)/(mQ+mL))*cos(phiQ-phiL), 0;
-    0,  0;
+    sin(phiQ-phiL)/(mQ*l),  0;
     0, 1/JQ]*[1, 1;-lQ, lQ];
 
 ddX = fvec + gvec*U;
