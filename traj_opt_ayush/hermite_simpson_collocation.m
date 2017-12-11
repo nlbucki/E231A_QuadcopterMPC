@@ -26,8 +26,9 @@ uk = @(ind)u(:, 2*ind-1);
 xk1 = @(ind)x(:, 2*ind+1);
 uk1 = @(ind)u(:, 2*ind+1);
 
-fdyn = @(x, u)sys.systemDynamics(0, x, u); % dynamics are independent of time
-
+% fdyn = @(x, u)sys.systemDynamics(0, x, u); % dynamics are independent of time
+% vecFields = @(x)sys.quadVectorFields(x);
+fdyn = @(x, u)quadLoadDynamics(sys, x, u);
 hk = Tf/N; % uniform spacing
 
 %% add constraints:
@@ -49,7 +50,7 @@ constraints = [constraints, tf.lb<=Tf<=tf.ub]; % final time constr
 constraints = [constraints, x0.lb <= x(:, 1) <= x0.ub]; % init condition
 constraints = [constraints, xf.lb <= x(:, end) <= xf.ub]; % final condition
 
-constraints = [constraints, [0;-2.5;zeros(4, 1)]<=xk(ceil(N/2))<=[0;2.5;zeros(4, 1)]]; % window constraint
+% constraints = [constraints, [0;-2.5;zeros(4, 1)]<=xk(ceil(N/2))<=[0;2.5;zeros(4, 1)]]; % window constraint
 %% add cost
 cost = 0;
 
@@ -68,9 +69,25 @@ x = double(x);
 u = double(u);
 hk = double(hk);
 Tf = double(Tf);
+tspan = linspace(0, Tf, 2*N+1);
+ddxk = zeros(numStates, 2*N+1);
+for i = 1:2*N+1
+    ddxk(:, i) = quadLoadDynamics(sys, x(:, i), u(:, i));
+end
 
 %% spline interp
+Ninterp = 100;
+tinterp = linspace(0, Tf, Ninterp);
+xinterp = zeros(numStates, Ninterp);
+uinterp = zeros(numInputs, Ninterp);
+for i = 1:Ninterp
+    xinterp(:, i) = pwPoly3(tspan, x, ddxk, tinterp(i)); % From: https://github.com/MatthewPeterKelly/OptimTraj
+end
 
+for i = 1:Ninterp
+    uinterp(:, i) = pwPoly2(tspan, u, tinterp(i)); % From: https://github.com/MatthewPeterKelly/OptimTraj
+end
+% 
 
 %% run sim
 
