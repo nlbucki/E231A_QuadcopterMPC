@@ -1,23 +1,23 @@
-function[xref,uref] = generate_ref_trajectory(sys,params)
+function[xref,uref] = generate_ref_trajectory(t, sys)
 %% 
 % function to generate reference trajectory
 
 %%
-time = 0:params.Ts:(params.Tf+params.N*params.Ts);
+% time = 0:params.Ts:(params.Tf+params.N*params.Ts);
 
 traj = @(t) sin_traj(t);
 % traj = @(t) circ_traj(t);
 
-xref = [];
-uref = [];
-for it = time
-    [ref] = sys.flat2state(traj(it));
-    xref_ = [ref.y; ref.z; ref.phi; ref.dy; ref.dz; ref.dphi];
-    uref_ = [ref.F1; ref.F2];
+% xref = [];
+% uref = [];
+% for it = time
+    [ref] = sys.flat2state(traj(t));
+    xref = [ref.y; ref.z; ref.phi; ref.dy; ref.dz; ref.dphi];
+    uref = [ref.F1; ref.F2];
     
-    xref = [xref, xref_];
-    uref = [uref, uref_];
-end
+%     xref = [xref, xref_];
+%     uref = [uref, uref_];
+% end
 
 
 end
@@ -26,17 +26,17 @@ function [flats] = sin_traj(t)
 y0 = 0;
 z0 = 0;
 vy0 = 1;
-ay0 = 0.01;
-zr = 0.5;
+ay0 = 0.05;
+zr = 1;
 
-f = 0.5;
+f = 0.25;
 w = 2*pi*f;
 
-flats.x = [y0+vy0*t+ay0*t^2;z0+zr*sin(w*t)]; 
-flats.dx = [vy0+2*ay0*t;zr*1E0.*w.*cos(t.*w)];
-flats.d2x = [0+2*ay0;(-zr*1E0).*w.^2.*sin(t.*w)];
-flats.d3x = [0;(-zr*1E0).*w.^3.*cos(t.*w)];
-flats.d4x = [0;zr*1E0.*w.^4.*sin(t.*w)];
+flats.x = [ay0.*t.^2+t.*vy0+y0;z0+zr.*sin(t.*w)];
+flats.dx = [2.*ay0.*t+vy0;w.*zr.*cos(t.*w)];
+flats.d2x = [2.*ay0;(-1).*w.^2.*zr.*sin(t.*w)];
+flats.d3x = [0;(-1).*w.^3.*zr.*cos(t.*w)];
+flats.d4x = [0;w.^4.*zr.*sin(t.*w)];
 end
 
 function [flats] = circ_traj(t)

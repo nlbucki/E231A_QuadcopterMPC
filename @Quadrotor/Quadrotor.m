@@ -100,14 +100,12 @@ methods
     
     function ddx = systemDynamics(obj, t, x, varargin)
         if nargin > 3
-           u = varargin{1};
-           [fvec, gvec] = obj.quadVectorFields(x);
-           ddx = fvec + gvec*u;                        
+           u = varargin{1};                        
         else
            u = obj.controller(obj, t,x);
-           [fvec, gvec] = obj.quadVectorFields(x);
-           ddx = fvec + gvec*u; 
         end
+        [fvec, gvec] = obj.quadVectorFields(x);
+        ddx = fvec + gvec*u; 
     end
     
     function u = calcControlInput(obj, t, x)

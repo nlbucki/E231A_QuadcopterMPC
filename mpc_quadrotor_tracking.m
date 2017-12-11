@@ -34,19 +34,19 @@ params.mpc.P = params.mpc.Q;
 
 %% Load reference trajectory
 
-load('trajectory.mat');
-tref =  time(1):params.mpc.Ts:time(end);
-uref = [interp1(time',control',tref','spline')]';
-xref = [interp1(time',states',tref','linear')]';
-
-figure
-plot(time,states(1,:),'r',tref,xref(1,:),'*b'); hold on
-plot(time,states(2,:),':r',tref,xref(2,:),'sb');
-figure;
-subplot(2,1,1);
-plot(time,control(1,:),'r',tref,uref(1,:),'b'); grid on;grid minor
-subplot(2,1,2);
-plot(time,control(2,:),'r',tref,uref(2,:),'b');grid on; grid minor
+% load('trajectory.mat');
+% tref =  time(1):params.mpc.Ts:time(end);
+% uref = [interp1(time',control',tref','spline')]';
+% xref = [interp1(time',states',tref','linear')]';
+% 
+% figure
+% plot(time,states(1,:),'r',tref,xref(1,:),'*b'); hold on
+% plot(time,states(2,:),':r',tref,xref(2,:),'sb');
+% figure;
+% subplot(2,1,1);
+% plot(time,control(1,:),'r',tref,uref(1,:),'b'); grid on;grid minor
+% subplot(2,1,2);
+% plot(time,control(2,:),'r',tref,uref(2,:),'b');grid on; grid minor
 
 % fixed point reference trajectory
 % --------------------------------
@@ -100,17 +100,17 @@ sys_response.x(:,1) = x0;
 
 % calculating input over the loop
 for impc = 1:params.mpc.M
-%     static_disp('calculting input for T = %.4f\n',impc*params.mpc.Ts);
+    static_disp('calculting input for T = %.4f\n',impc*params.mpc.Ts);
     
-    % optimizing for input
+    %% optimizing for input
     xk = sys_response.x(:,impc);
-%     xrefk = xref(:,impc:(impc+params.mpc.N));
-    xrefk = [xref(:,impc), repmat(xref(:,impc+1),1,params.mpc.N)];
-%     urefk = uref(:,impc:(impc+params.mpc.N));
-    urefk = repmat(uref(:,impc),1,params.mpc.N+1);
+    xrefk = xref(:,impc:(impc+params.mpc.N));
+%     xrefk = [xref(:,impc), repmat(xref(:,impc+1),1,params.mpc.N)];
+    urefk = uref(:,impc:(impc+params.mpc.N));
+%     urefk = repmat(uref(:,impc),1,params.mpc.N+1);
     ctlk = solve_cftoc(xk,xrefk,urefk,sys,params);
     
-    % forward simulation
+    %% forward simulation
     f0 = act_sys.systemDynamics([],xrefk(:,1),urefk(:,1));
     [A,B] = act_sys.discretizeLinearizeQuadrotor(params.mpc.Ts, xrefk(:,1),urefk(:,1));
     u = ctlk.uOpt(:,1);
