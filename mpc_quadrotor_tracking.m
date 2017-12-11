@@ -23,10 +23,10 @@ act_sys = sys;
 
 %% MPC params
 % params
-params.mpc.Tf = 100;
+params.mpc.Tf = 10;
 params.mpc.Ts = .1;
 params.mpc.M = params.mpc.Tf/params.mpc.Ts;
-params.mpc.N = 10;
+params.mpc.N = 3;
 % gains
 params.mpc.Q = diag([1000,1000,1000,1,1,1]); %100*eye(sys.nDof);
 params.mpc.R = 0.001*eye(sys.nAct);
@@ -71,22 +71,18 @@ params.mpc.P = params.mpc.Q;
 % end
 % uref = (sys.mQ*sys.g/2)*ones(2,params.mpc.M+params.mpc.N);
 
-%% Testing the generated reference trajectory
-% time = 0:params.mpc.Ts:params.mpc.Tf;
-% xtest = xref(:,1);
-% for it = 1:(length(time)-1)
-%     f0 = act_sys.systemDynamics([],xref(:,it),uref(:,it));
-%     [A,B] = act_sys.discretizeLinearizeQuadrotor(params.mpc.Ts, xref(:,it),uref(:,it));
-% %     xtestk = sys.systemDynamics(time(it),xtest(:,it),uref(:,it));
-%     xtestk = f0+A*(xref(:,it)-xref(:,it))+B*(uref(:,it)-uref(:,it));
-%     xtest = [xtest,xtestk];
-% end
-% figure;
-% plot(xtest(1,:),xtest(2,:));
-% opts.t = time';
-% opts.x = xtest';
-% opts.vid.MAKE_MOVIE = false;
-% sys.animateQuadrotor(opts);
+% diff-flat trajectory
+% --------------------
+tref = [0:params.mpc.Ts:params.mpc.Tf];
+xref = [];
+uref = [];
+for i = 1:length(tref)
+    [x_, u_] = generate_ref_trajectory(tref(i)  ,sys);
+    xref = [xref,x_];
+    uref = [uref,u_];
+end
+xref = [xref, repmat(xref(:,end),1,params.mpc.N)];
+uref = [uref, repmat(uref(:,end),1,params.mpc.N)];
 
 %% Initial condition
 % x0 = [-1.5;-1.5;0;0;0;0];
@@ -100,23 +96,24 @@ sys_response.x(:,1) = x0;
 
 % calculating input over the loop
 for impc = 1:params.mpc.M
-    static_disp('calculting input for T = %.4f\n',impc*params.mpc.Ts);
+    fprintf('calculting input for T = %.4f\n',impc*params.mpc.Ts);
     
     %% optimizing for input
     xk = sys_response.x(:,impc);
     xrefk = xref(:,impc:(impc+params.mpc.N));
-%     xrefk = [xref(:,impc), repmat(xref(:,impc+1),1,params.mpc.N)];
     urefk = uref(:,impc:(impc+params.mpc.N));
+    
+%     xrefk = [xref(:,impc), repmat(xref(:,impc+1),1,params.mpc.N)];
 %     urefk = repmat(uref(:,impc),1,params.mpc.N+1);
-    ctlk = solve_cftoc(xk,xrefk,urefk,sys,params);
+    
+    ctlk = solve_cftoc(params.mpc.Ts,xk,xrefk,urefk,sys,params);
     
     %% forward simulation
-    f0 = act_sys.systemDynamics([],xrefk(:,1),urefk(:,1));
-    [A,B] = act_sys.discretizeLinearizeQuadrotor(params.mpc.Ts, xrefk(:,1),urefk(:,1));
-    u = ctlk.uOpt(:,1);
+    uk = ctlk.uOpt(:,1)
+    dxk = act_sys.systemDynamics([],xk,uk);
     %
-    sys_response.x(:,impc+1) = f0 + A*(xk-xrefk(:,1))+B*(u-urefk(:,1));
-    sys_response.u(:,impc) = u;
+    sys_response.x(:,impc+1) = xk + params.mpc.Ts*dxk;
+    sys_response.u(:,impc) = uk;
 end
 
 
@@ -162,7 +159,9 @@ grid on; grid minor;
 
 
 figure;
-plot(sys_response.x(1,:),sys_response.x(2,:),'r','linewidth',2);
+plot(sys_response.x(1,:),sys_response.x(2,:),'r','linewidth',2);hold on;
+plot(xref(1,:),xref(2,:),'b','linewidth',2);
+legend('x','xref');
 grid on; grid minor;
 xlabel('Y');ylabel('Z');
 title('output trajectory');
