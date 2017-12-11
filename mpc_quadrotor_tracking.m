@@ -26,10 +26,10 @@ act_sys = sys;
 params.mpc.Tf = 10;
 params.mpc.Ts = .1;
 params.mpc.M = params.mpc.Tf/params.mpc.Ts;
-params.mpc.N = 3;
+params.mpc.N = 10;
 % gains
-params.mpc.Q = diag([1000,1000,1000,1,1,1]); %100*eye(sys.nDof);
-params.mpc.R = 0.001*eye(sys.nAct);
+params.mpc.Q = diag([1,1,1,1,1,1]); %100*eye(sys.nDof);
+params.mpc.R = 1*eye(sys.nAct);
 params.mpc.P = params.mpc.Q;    
 
 %% Load reference trajectory
@@ -109,8 +109,11 @@ for impc = 1:params.mpc.M
     ctlk = solve_cftoc(params.mpc.Ts,xk,xrefk,urefk,sys,params);
     
     %% forward simulation
-    uk = ctlk.uOpt(:,1)
-    dxk = act_sys.systemDynamics([],xk,uk);
+    f0 = act_sys.systemDynamics([],xrefk(:,1),urefk(:,1));
+    [A,B] = act_sys.linearizeQuadrotor(xrefk(:,1),urefk(:,1));
+    
+    uk = ctlk.uOpt(:,1);
+    dxk = f0 + A*(xk-xrefk(:,1)) + B*(uk-urefk(:,1));
     %
     sys_response.x(:,impc+1) = xk + params.mpc.Ts*dxk;
     sys_response.u(:,impc) = uk;

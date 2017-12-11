@@ -31,9 +31,13 @@ constraints = [];
 constraints = [constraints, x(:,1)==xk];
 % looping over the N steps
 for ii = 1:N
+    f0 = sys.systemDynamics([],xrefk(:,ii),urefk(:,ii));
+    [A,B] = sys.linearizeQuadrotor(xrefk(:,ii),urefk(:,ii));
+    dxk = f0 + A*(x(:,ii)-xrefk(:,ii)) + B*(u(:,ii)-urefk(:,ii));
+    
     constraints = [constraints,...
 %             x(:,ii+1) == f0 + A*(x(:,ii)-xref(:,ii))+B*(u(:,ii)-uref(:,ii)),... % dynamics
-            x(:,ii+1) == x(:,ii)+Ts*sys.systemDynamics([],x(:,ii),u(:,ii)),... % dynamics
+            x(:,ii+1) == x(:,ii)+Ts*dxk,... % dynamics
             sys.bounds.inputs.lb <= u(:,ii), u(:,ii) <= sys.bounds.inputs.ub,... % input constraints
             sys.bounds.states.lb <= x(:,ii), x(:,ii) <= sys.bounds.states.ub... % state constraints
             ];
@@ -53,7 +57,7 @@ cost = cost + (x(:,N+1)-xrefk(:,N+1))'*P*(x(:,N+1)-xrefk(:,N+1));
 % end
 
 %% optimization
-options = sdpsettings('verbose', true,'solver','IPOPT');
+options = sdpsettings('verbose', false,'solver','IPOPT');
 options.ipopt.max_iter = 10000;
 sol = optimize(constraints,cost,options);
 
