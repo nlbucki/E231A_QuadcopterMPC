@@ -1,4 +1,4 @@
-function [ctl] = solve_cftoc(xk,xrefk,urefk,sys,params)
+function [ctl] = solve_cftoc(Ts,xk,xrefk,urefk,sys,params)
 %% function to Constrained Finite Time Optimal Control
 yalmip('clear');
 
@@ -7,7 +7,7 @@ Q = params.mpc.Q;
 P = params.mpc.P;
 R = params.mpc.R;
 N = params.mpc.N;
-Ts = params.mpc.Ts;
+% Ts = params.mpc.Ts;
 
 %% creating optimization variables
 % state variables
@@ -32,29 +32,33 @@ constraints = [constraints, x(:,1)==xk];
 % looping over the N steps
 for ii = 1:N
     f0 = sys.systemDynamics([],xrefk(:,ii),urefk(:,ii));
-    [A,B] = sys.discretizeLinearizeQuadrotor(Ts, xrefk(:,ii),urefk(:,ii));
+    [A,B] = sys.linearizeQuadrotor(xrefk(:,ii),urefk(:,ii));
+    dxk = f0 + A*(x(:,ii)-xrefk(:,ii)) + B*(u(:,ii)-urefk(:,ii));
+    
     constraints = [constraints,...
-            x(:,ii+1) == f0 + A*(x(:,ii)-xref(:,ii))+B*(u(:,ii)-uref(:,ii)),... % dynamics
+%             x(:,ii+1) == f0 + A*(x(:,ii)-xref(:,ii))+B*(u(:,ii)-uref(:,ii)),... % dynamics
+            x(:,ii+1) == x(:,ii)+Ts*dxk,... % dynamics
             sys.bounds.inputs.lb <= u(:,ii), u(:,ii) <= sys.bounds.inputs.ub,... % input constraints
             sys.bounds.states.lb <= x(:,ii), x(:,ii) <= sys.bounds.states.ub... % state constraints
             ];
 	% cost function
     cost = cost ...
-        + (x(:,ii)-xref(:,ii))'*Q*(x(:,ii)-xref(:,ii))...
-        + (u(:,ii)-uref(:,ii))'*R*(u(:,ii)-uref(:,ii));
+        + (x(:,ii)-xrefk(:,ii))'*Q*(x(:,ii)-xrefk(:,ii))...
+        + (u(:,ii)-urefk(:,ii))'*R*(u(:,ii)-urefk(:,ii));
 end   
 % terminal cost
-cost = cost + (x(:,N+1)-xref(:,N+1))'*P*(x(:,N+1)-xref(:,N+1));
+cost = cost + (x(:,N+1)-xrefk(:,N+1))'*P*(x(:,N+1)-xrefk(:,N+1));
 
 % reference constraints
-for ij = 1:N+1
-    constraints = [constraints,...
-                    xref(:,ij)==xrefk(:,ij),...
-                    uref(:,ij)==urefk(:,ij)];
-end
+% for ij = 1:N+1
+%     constraints = [constraints,...
+%                     xref(:,ij)==xrefk(:,ij),...
+%                     uref(:,ij)==urefk(:,ij)];
+% end
 
 %% optimization
-options = sdpsettings('verbose', false, 'solver', 'quadprog');
+options = sdpsettings('verbose', false,'solver','IPOPT');
+options.ipopt.max_iter = 10000;
 sol = optimize(constraints,cost,options);
 
 %% 
