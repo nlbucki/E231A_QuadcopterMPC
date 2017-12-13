@@ -86,28 +86,28 @@ methods
             obj.wL = 0.05;
         end
         
-        if isfield(params, 'Fmin')
-			obj.Fmin = params.Fmin;
+        if isfield(params, 'F1min')
+			obj.F1min = params.F1min;
         else
-            obj.Fmin = 0;
+            obj.F1min = 0;
         end
         
-        if isfield(params, 'Fmax')
-			obj.Fmax = params.Fmax;
+        if isfield(params, 'F1max')
+			obj.F1max = params.F1max;
         else
-            obj.Fmax = obj.g*(obj.mQ+obj.mL)*10;
+            obj.F1max = 15;
         end
         
-        if isfield(params, 'Mmin')
-			obj.Mmin = params.Mmin;
+        if isfield(params, 'F2min')
+			obj.F2min = params.F2min;
         else
-            obj.Mmin = -obj.lQ*obj.Fmax;
+            obj.F2min = 0;
         end
         
-        if isfield(params, 'Mmax')
-			obj.Mmax = params.Mmax;
+        if isfield(params, 'F2max')
+			obj.F2max = params.F2max;
         else
-            obj.Mmax = obj.lQ*obj.Fmax;
+            obj.F2max = 15;
         end
     end     
     
