@@ -14,7 +14,7 @@ yalmip('clear')
 
 %% Build quadrotor system
 params = struct;
-sys = Quadrotor(params);
+sys = Quadrotorload(params);
 
 % actual quadrotor system: to simulate model uncertainty
 act_sys = sys;
@@ -28,7 +28,7 @@ params.mpc.Ts = .1;
 params.mpc.M = params.mpc.Tf/params.mpc.Ts;
 params.mpc.N = 10;
 % gains
-params.mpc.Q = diag([1,1,1,1,1,1]); %100*eye(sys.nDof);
+params.mpc.Q = eye(sys.nDof);
 params.mpc.R = 1*eye(sys.nAct);
 params.mpc.P = params.mpc.Q;    
 

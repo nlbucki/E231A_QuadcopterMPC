@@ -101,7 +101,7 @@ hist = 5000 ;
         
         plot(x(max(1,i-hist):i, 1), x(max(1,i-hist):i, 2), 'k') ;
         if xd_flag
-            l = plot(xd(max(1,i-hist):i, 1), xd(max(1,i-hist):i, 2), 'og','linewidth',6);
+            l = plot(xd(max(1,i-hist):i, 1), xd(max(1,i-hist):i, 2), 'g','linewidth',1);
             l.Color(4) = 0.4;
         end
     %         plot3(x(max(1,i-hist):i, 1)-L*x(max(1,i-hist):i,7), x(max(1,i-hist):i, 2)-L*x(max(1,i-hist):i,8), x(max(1,i-hist):i, 3)-L*x(max(1,i-hist):i,9), 'r') ;
@@ -138,7 +138,7 @@ function drawQuadrotor(parent,x)
     R = [cos(phi), -sin(phi);
             sin(phi), cos(phi)];
     
-    points = [y;z] + R'*base;  
+    points = [y;z] + R*base;  
     
     s.qhandle1 = line([points(1,1), points(1,2)], [points(2,1), points(2,2)]); hold on ;
     s.qhandle2 = line([points(1,1), points(1,3)], [points(2,1), points(2,3)]);
