@@ -10,10 +10,10 @@ properties
     
     g@double
 
-    Fmin@double
-    Fmax@double
-    Mmin@double
-    Mmax@double
+    F1min@double
+    F1max@double
+    F2min@double
+    F2max@double
 
     controller@function_handle
     controlParams@struct

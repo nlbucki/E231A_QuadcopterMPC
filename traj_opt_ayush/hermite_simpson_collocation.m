@@ -13,7 +13,7 @@ sys = Quadrotorload(params);
 numStates = sys.nDof;
 numInputs = sys.nAct;
 addBounds;
-N = 10; % number of grid points 
+N = 20; % number of grid points 
 
 x = sdpvar(numStates, 2*N+1);
 u = sdpvar(numInputs, 2*N+1);
@@ -27,7 +27,6 @@ xk1 = @(ind)x(:, 2*ind+1);
 uk1 = @(ind)u(:, 2*ind+1);
 
 % fdyn = @(x, u)sys.systemDynamics(0, x, u); % dynamics are independent of time
-% vecFields = @(x)sys.quadVectorFields(x);
 fdyn = @(x, u)quadLoadDynamics(sys, x, u);
 hk = Tf/N; % uniform spacing
 
@@ -37,6 +36,8 @@ constraints = [];
 for i = 1:2*N+1
     constraints = [constraints, state.lb<=x(:, i)<=state.ub];
     constraints = [constraints, input.lb<=u(:, i)<=input.ub];
+%     constraints = obstacle1(sys,constraints, x(:, i), 0, 0, 2);
+%     constraints = obstacle1(sys, constraints, x(:, i), 0, 3, 2);
 end
 
 % system dynamics (collocation constraints)
@@ -49,6 +50,7 @@ end
 constraints = [constraints, tf.lb<=Tf<=tf.ub]; % final time constr
 constraints = [constraints, x0.lb <= x(:, 1) <= x0.ub]; % init condition
 constraints = [constraints, xf.lb <= x(:, end) <= xf.ub]; % final condition
+
 
 % constraints = [constraints, [0;-2.5;zeros(4, 1)]<=xk(ceil(N/2))<=[0;2.5;zeros(4, 1)]]; % window constraint
 %% add cost
