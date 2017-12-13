@@ -19,7 +19,7 @@ sys.controller = @controller;
 
 
 %% Generate obstacle avoiding trajectory
-% traj = traj_gen_QR_polyhedron(sys);
+traj = traj_gen_QRL_polyhedron(sys);
 %% Generate trajectory to track
 % load trajectory
 % time = traj.t;
