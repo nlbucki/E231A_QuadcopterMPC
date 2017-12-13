@@ -28,6 +28,6 @@ end
 
 K = dlqr(A,B, 5*eye(dof), eye(nAct));
 
-u = -K*(x-xd) + (obj.mQ + obj.mL)*obj.g/2*ones(2,1);
+u = -K*(x-xd) + (obj.mQ + obj.mL)*obj.g/2*ones(2,1)*cos(x(4));
 
 end
