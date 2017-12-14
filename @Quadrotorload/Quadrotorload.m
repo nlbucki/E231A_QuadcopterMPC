@@ -146,13 +146,11 @@ methods
     end
     
     function [f, g] = quadVectorFields(obj, x)
-%         params = [mQ;JQ;lQ;g];
         params = [obj.mQ;obj.JQ;obj.lQ;obj.mL;obj.l;obj.g];
         [f,g] = quadrotorloadVectorFields(x,params);
     end
     
     function [A, B] = linearizeQuadrotor(obj, x0, u0)
-%         params = [mQ;JQ;lQ;g];
         params = [obj.mQ;obj.JQ;obj.lQ;obj.mL;obj.l;obj.g];
         [A, B] = quadrotorloadLinearDynamics(x0, u0, params);
     end
@@ -165,7 +163,6 @@ methods
         end
         [fvec, gvec] = obj.quadVectorFields(x);
         ddx = fvec + gvec*u;
-        
     end
     
     function u = calcControlInput(obj, t, x)

@@ -1,4 +1,5 @@
-if numStates == 6
+
+if numStates == 6 % quadrotor
     state.lb = [-15;-15;deg2rad(-89);-5;-5;-10];
     state.ub = -state.lb;
     x0.lb = [0; -10; zeros(4, 1)];
@@ -6,18 +7,18 @@ if numStates == 6
 
     xf.lb = [10;10;0;0;0;0];
     xf.ub = xf.lb;
-else
-    state.lb = [-15;-15;deg2rad(-180);deg2rad(-89);-5;-5;-10;-10];
+else % quadrotor with load
+    state.lb = [-15;-15;deg2rad(-89);deg2rad(-89);-5;-5;-10;-10];
     state.ub = -state.lb;
     
-    x0.lb = [0; 0; zeros(6, 1)];
+    x0.lb = [-10; 5; zeros(6, 1)];
     x0.ub = x0.lb;
 
-    xf.lb = [0;0;pi;0;zeros(4, 1)];
+    xf.lb = [10;5;0;0;zeros(4, 1)];
     xf.ub = xf.lb;
 end
 
-input.ub = 20*ones(2,1);
+input.ub = 15*ones(2,1);
 input.lb = zeros(2,1);
 
 % x0.lb = [-10.5;-10.5;0;0;0;0];
