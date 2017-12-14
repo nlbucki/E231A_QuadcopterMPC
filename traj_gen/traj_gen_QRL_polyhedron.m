@@ -124,7 +124,7 @@ for k = 1:N
 end
 
 % Specify solver and solve the optimization problem
-options = sdpsettings('verbose', 1, 'solver', 'IPOPT','usex0',1);
+options = sdpsettings('verbose', 3, 'solver', 'IPOPT','usex0',1);
 opt = optimize(constr, cost, options);
 % Assign output variables
 % traj.t = cumsum(value(Topt));
