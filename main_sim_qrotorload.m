@@ -28,8 +28,8 @@ xL = [-13; -13; -xU(3:end)];
 N=80;
 
 % obstacles
-O ={Polyhedron('V',[-6 -6.1; -6 xU(2)+0.1; -8 -6.1; -8 xU(2)+0.1]),...
-    Polyhedron('V',[-6 -6.9; -6 xL(2)-0.1; -8 -6.9; -8 xL(2)-0.1])};
+O ={Polyhedron('V',[-6 -5.5; -6 xU(2)+0.1; -7 -5.5; -7 xU(2)+0.1]),...
+    Polyhedron('V',[-6 -7.5; -6 xL(2)-0.1; -7 -7.5; -7 xL(2)-0.1])};
 
 % initial guess
 xinit = zeros(length(xF),N+1);
