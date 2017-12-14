@@ -1,4 +1,4 @@
-function animate(obj,opts_in)
+function animateQuadrotorload(obj,opts_in)
 % function to animate the quadrotor
 
 % default options
@@ -16,8 +16,8 @@ opts_default.vid.FrameRate = 24;
 
 
 % initialize the animation figure and axes
-    figure_x_limits = [-12 12];
-    figure_y_limits = [-5 12];
+    figure_x_limits = [-2 2];
+    figure_y_limits = [-2 2];
     figure_z_limits = [0 1] ;
     fig1 = figure;
 

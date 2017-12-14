@@ -12,49 +12,64 @@ static_disp('');
 close all
 yalmip('clear')
 
+
 %% Build quadrotor system
 params = struct;
-sys = Quadrotor(params);
+sys = Quadrotorload(params);
+
+%% Load reference trajectory
+% diff-flat trajectory
+% --------------------
+% tref = [0:params.mpc.Ts:params.mpc.Tf];
+% xref = [];
+% uref = [];
+% for i = 1:length(tref)
+% %     [x_, u_] = generate_ref_trajectory(tref(i)  ,sys);
+%     x_ = zeros(sys.nDof,1);
+%     u_ = (sys.mQ)*sys.g*0.5*ones(sys.nAct,1);
+%     xref = [xref,x_];
+%     uref = [uref,u_];
+% end
+
+%% load optimized results
+load('./results/traj_load_inverted_pendelum.mat');
+xref = traj.x;
+uref = traj.u;
+tref = traj.t;
+
+N = 3;
+
+xref = [xref, repmat(xref(:,end),1,N)];
+uref = [uref, repmat(uref(:,end),1,N)];
+
+%% Initial condition
+% x0 = [-.5;-.5;0;0;0;0];
+x0  = xref(:,1);
 
 %% MPC params
 % params
-params.mpc.Tf = 10;
-params.mpc.Ts = .1;
-params.mpc.M = params.mpc.Tf/params.mpc.Ts;
-params.mpc.N = 10;
+% params.mpc.Tf = 10;
+% params.mpc.Ts = .1;
+% params.mpc.M = params.mpc.Tf/params.mpc.Ts;
+% params.mpc.N = 10;
+
+params.mpc.M = length(tref)-1;
+params.mpc.N = N;
+
 % gains
-% params.mpc.Q = diag([100,100,10,10,1,1,1,1]);
-params.mpc.Q = eye(sys.nDof);
+params.mpc.Q = diag([100,100,10,10,1,1,1,1]);
+% params.mpc.Q = eye(sys.nDof);
 params.mpc.R = 1*eye(sys.nAct);
 params.mpc.P = params.mpc.Q;    
 
 sys.controlParams = params;
 
-%% Load reference trajectory
-% diff-flat trajectory
-% --------------------
-tref = [0:params.mpc.Ts:params.mpc.Tf];
-xref = [];
-uref = [];
-for i = 1:length(tref)
-%     [x_, u_] = generate_ref_trajectory(tref(i)  ,sys);
-    x_ = zeros(sys.nDof,1);
-    u_ = (sys.mQ)*sys.g*0.5*ones(sys.nAct,1);
-    xref = [xref,x_];
-    uref = [uref,u_];
-end
-xref = [xref, repmat(xref(:,end),1,params.mpc.N)];
-uref = [uref, repmat(uref(:,end),1,params.mpc.N)];
-
-%% Initial condition
-x0 = [-.5;-.5;0;0;0;0];
-% x0  = xref(:,1);
 
 %% Control 
-[sys_response] = sys.mpcTracking(x0,tref,xref,uref,'DL');
+[sys_response] = sys.mpc_load_Tracking(x0,tref,xref,uref,'DL');
 
 %% plots
-time = 0:params.mpc.Ts:params.mpc.Tf;
+time = sys_response.t;
 figure
 subplot(2,3,1);
 plot(time', sys_response.x(1,:)');
@@ -116,7 +131,7 @@ opts.x = sys_response.x';
 opts.td = time';
 opts.xd = xref(:,1:params.mpc.M+1)';
 opts.vid.MAKE_MOVIE = false;
-sys.animate(opts);
+sys.animateQuadrotorload(opts);
 
 
 

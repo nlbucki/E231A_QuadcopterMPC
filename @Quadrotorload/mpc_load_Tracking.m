@@ -32,8 +32,8 @@ for impc = 1:obj.controlParams.mpc.M
 %     urefk = repmat(uref(:,impc),1,params.mpc.N+1);
     
     Ts = Ts_ref(impc);
-    ctlk = obj.solve_mpc(Ts,xk,xrefk,urefk);
-    uk = ctlk.uOpt(:,1);
+    ctlk = obj.solve_load_mpc(Ts,xk,xrefk,urefk);
+    uk = ctlk.uOpt(:,1)
     
     %% forward simulation
     % discrete -linear- simulation

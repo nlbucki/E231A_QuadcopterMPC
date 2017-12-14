@@ -116,11 +116,11 @@ methods
         else 
             % input bounds
             bounds.inputs.lb = [0; 0];
-            bounds.inputs.ub = [2*(obj.mQ+obj.mL)*obj.g; 2*(obj.mQ+obj.mL)*obj.g]; % --> *2bUpdated*
+            bounds.inputs.ub = [obj.F1max;obj.F1max]; % --> *2bUpdated*
             
         	% state bounds 
-            bounds.states.lb = [-100; -100; -pi/3; -pi/3; -100; -100; -100; -100];
-            bounds.states.ub = [100; 100; pi/3; pi/3; 100; 100; 100; 100];
+            bounds.states.lb = [-100; -100; -pi; -pi; -100; -100; -100; -100];
+            bounds.states.ub = [100; 100; pi; pi; 100; 100; 100; 100];
             
             obj.bounds = bounds;
         end
@@ -170,11 +170,11 @@ methods
     end
     
     [A, B] = discretizeLinearizeQuadrotorload(obj, Ts, xk, uk);
-    [sys_response] = mpcTracking(obj,x0,tref,xref,uref,varargin);
-    [ctl] = solve_mpc(obj,Ts,xk,xrefk,urefk);
+    [sys_response] = mpc_load_Tracking(obj,x0,tref,xref,uref,varargin);
+    [ctl] = solve_load_mpc(obj,Ts,xk,xrefk,urefk);
     
     % animation
-    animate(obj,opts_in)
+    animateQuadrotorload(obj,opts_in)
     
     
 end
