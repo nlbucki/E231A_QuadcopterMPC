@@ -1,4 +1,4 @@
-function animateQuadrotorload(obj,opts_in)
+function animate(obj,opts_in)
 % function to animate the quadrotor
 
 % default options

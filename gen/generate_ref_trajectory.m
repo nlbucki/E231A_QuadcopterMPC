@@ -5,21 +5,26 @@ function[xref,uref] = generate_ref_trajectory(t, sys)
 %%
 % time = 0:params.Ts:(params.Tf+params.N*params.Ts);
 
+% traj = @(t) waypoint(t);
 traj = @(t) sin_traj(t);
 % traj = @(t) circ_traj(t);
 
-% xref = [];
-% uref = [];
-% for it = time
     [ref] = sys.flat2state(traj(t));
     xref = [ref.y; ref.z; ref.phi; ref.dy; ref.dz; ref.dphi];
     uref = [ref.F1; ref.F2];
     
-%     xref = [xref, xref_];
-%     uref = [uref, uref_];
-% end
 
+end
 
+function [flats] = waypoint(t)
+y0 = 0;
+z0 = 0;
+
+flats.x = [y0;z0];
+flats.dx = [0;0];
+flats.d2x = [0;0];
+flats.d3x = [0;0];
+flats.d4x = [0;0];
 end
 
 function [flats] = sin_traj(t)

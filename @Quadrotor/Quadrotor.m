@@ -121,8 +121,11 @@ methods
         [Ad, Bd] = discretizeLinearizeQuadrotor(obj, Ts, xk, uk);
     end
 
+    [sys_response] = mpcTracking(obj,x0,tref,xref,uref,varargin);
+    [ctl] = solve_mpc(obj,Ts,xk,xrefk,urefk);
+    
     % animation
-    animateQuadrotor(obj,opts_in);
+    animate(obj,opts_in);
     
     
 end

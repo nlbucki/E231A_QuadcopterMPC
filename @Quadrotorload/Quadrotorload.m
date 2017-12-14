@@ -17,6 +17,7 @@ properties
 
     controller@function_handle
     controlParams@struct
+    bounds@struct
 
     mL@double
     l@double
@@ -30,7 +31,7 @@ end
 methods
 	
 	% class constructor
-	function obj = Quadrotorload(params)
+	function obj = Quadrotorload(params,varargin)
         
         if isfield(params, 'mQ')
             obj.mQ = params.mQ;
@@ -109,6 +110,20 @@ methods
         else
             obj.F2max = 15;
         end
+        
+        if nargin > 1
+            obj.bounds = varargin{1};
+        else 
+            % input bounds
+            bounds.inputs.lb = [0; 0];
+            bounds.inputs.ub = [2*(obj.mQ+obj.mL)*obj.g; 2*(obj.mQ+obj.mL)*obj.g]; % --> *2bUpdated*
+            
+        	% state bounds 
+            bounds.states.lb = [-100; -100; -pi/3; -pi/3; -100; -100; -100; -100];
+            bounds.states.ub = [100; 100; pi/3; pi/3; 100; 100; 100; 100];
+            
+            obj.bounds = bounds;
+        end
     end     
     
     % set property values
@@ -120,8 +135,13 @@ methods
         end
     end
 
-    function sol = simulate(obj, tspan, x0, solver)
-        odefun = @(t,x)systemDynamics(obj, t, x);
+    function sol = simulate(obj, tspan, x0, solver,varargin)
+        if nargin > 4
+            u = varargin{1};
+            odefun = @(t,x)systemDynamics(obj, t, x,u);
+        else
+            odefun = @(t,x)systemDynamics(obj, t, x);
+        end
         sol = solver(odefun, tspan, x0);
     end
     
@@ -137,9 +157,12 @@ methods
         [A, B] = quadrotorloadLinearDynamics(x0, u0, params);
     end
     
-    function ddx = systemDynamics(obj, t, x)
-        
-        u = obj.controller(obj, t,x);
+    function ddx = systemDynamics(obj, t, x, varargin)
+        if nargin > 3
+           u = varargin{1};                        
+        else
+           u = obj.controller(obj, t,x);
+        end
         [fvec, gvec] = obj.quadVectorFields(x);
         ddx = fvec + gvec*u;
         
@@ -150,11 +173,11 @@ methods
     end
     
     [A, B] = discretizeLinearizeQuadrotorload(obj, Ts, xk, uk);
-    % TODO:
-%     obj = setLoadMass(mL); 
-
+    [sys_response] = mpcTracking(obj,x0,tref,xref,uref,varargin);
+    [ctl] = solve_mpc(obj,Ts,xk,xrefk,urefk);
+    
     % animation
-    animateQuadrotorload(obj,t,x,varargin)
+    animate(obj,opts_in)
     
     
 end
