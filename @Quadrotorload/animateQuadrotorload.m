@@ -16,8 +16,8 @@ opts_default.vid.FrameRate = 24;
 
 
 % initialize the animation figure and axes
-    figure_x_limits = [-12 12];
-    figure_y_limits = [-5 12];
+    figure_x_limits = [-2 2];
+    figure_y_limits = [-2 2];
     figure_z_limits = [0 1] ;
     fig1 = figure;
 
@@ -113,8 +113,8 @@ hist = 1 ;
             s = sprintf('Running\n t = %1.2fs \n 1/%d realtime speed',t(i), RATE/25);
             text(x(i,1)-1.5,x(i,2)+1.5,s,'FontAngle','italic','FontWeight','bold');
         drawnow;
-        figure_x_limits_ = figure_x_limits;%+x(i,1);
-        figure_y_limits_ = figure_y_limits;%+x(i,2);
+        figure_x_limits_ = figure_x_limits+x(i,1);
+        figure_y_limits_ = figure_y_limits+x(i,2);
         set(axes1,'XLim',figure_x_limits_,'YLim',figure_y_limits_);
         if opts.vid.MAKE_MOVIE
             M(:,i) = getframe; 

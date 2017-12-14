@@ -34,8 +34,8 @@ Amat = subs(Amat, [X',U'], [X0', U0']);
 Bmat = jacobian(ddX, U);
 Bmat = subs(Bmat, [X', U'], [X0', U0']);
 
-matlabFunction(fvec, gvec, 'File', '../@Quadrotorload/quadrotorloadVectorFields', 'Vars', {X, params});
-matlabFunction(Amat, Bmat, 'File', '../@Quadrotorload/quadrotorloadLinearDynamics', 'Vars', {X0, U0, params});
+matlabFunction(fvec, gvec, 'File', '../gen/quadrotorloadVectorFields', 'Vars', {X, params});
+matlabFunction(Amat, Bmat, 'File', '../gen/quadrotorloadLinearDynamics', 'Vars', {X0, U0, params});
 
 
 

@@ -15,5 +15,13 @@ end
 % super ellipse obstacle
 
 xQ = computeQuadPosition(sys, x);
+x1 = xQ(1, :) + sys.lQ.*cos(x(4, :));
+y1 = xQ(2, :) + sys.lQ.*sin(x(4, :));
+x2 = xQ(1, :) - sys.lQ.*cos(x(4, :));
+y2 = xQ(2, :) - sys.lQ.*sin(x(4, :));
+
 constraint = [constraint, ((x(1, :) - x0)./a).^d + ((x(2, :) - y0)./b).^d >= 1]; % constraint on the load
 constraint = [constraint, ((xQ(1, :) - x0)./a).^d + ((xQ(2, :) - y0)./b).^d >= 1];
+
+constraint = [constraint, ((x1(1, :) - x0)./a).^d + ((y1(1, :) - y0)./b).^d >= 1]; 
+constraint = [constraint, ((x2(1, :) - x0)./a).^d + ((y2(1, :) - y0)./b).^d >= 1]; 

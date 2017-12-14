@@ -41,8 +41,8 @@ for i = 1:2*N+1
     constraints = [constraints, input.lb<=u(:, i)<=input.ub];
 %     constraints = obstacle1(sys,constraints, x(:, i), 0, 0, 2);
 %     constraints = obstacle1(sys, constraints, x(:, i), 0, 3, 2);
-    constraints = superEllipse(sys, constraints, x(:, i), 0, -15, 3, 14.9);
-    constraints = superEllipse(sys, constraints, x(:, i), 0, 15, 3, 14.9);
+%     constraints = superEllipse(sys, constraints, x(:, i), 0, -15, 3, 14.9);
+%     constraints = superEllipse(sys, constraints, x(:, i), 0, 15, 3, 14.9);
 end
 
 % system dynamics (collocation constraints)
@@ -63,18 +63,19 @@ cost = 0;
 for i = 1:N
     cost = cost + (hk/6)*(norm(uk(i))^2 + 4*norm(uMidPt(i))^2 + norm(uk1(i))^2);
 end
+cost = cost + Tf^2;
 %% call nlp solver
 xL = linspace(x0.lb(1), xf.lb(1), 2*N+1);
 xinit = [xL;zeros(numStates-1, 2*N+1)];
-uinit = zeros(numInputs, 2*N+1);
+uinit = (sys.mQ + sys.mL)*sys.g*ones(numInputs, 2*N+1);
 Tfinit = 10;
 options = sdpsettings('solver', 'IPOPT', 'usex0', true, 'showprogress', 1,'verbose', 3);
-% assign(x,soln.x);
-% assign(u, soln.u);
-% assign(Tf, soln.Tf);
-assign(x, xinit);
-assign(u, uinit);
-assign(Tf, Tfinit);
+assign(x,soln.x);
+assign(u, soln.u);
+assign(Tf, soln.Tf);
+% assign(x, xinit);
+% assign(u, uinit);
+% assign(Tf, Tfinit);
 
 tic
 opt = optimize(constraints, cost, options);
