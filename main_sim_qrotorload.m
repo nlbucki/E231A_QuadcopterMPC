@@ -17,9 +17,31 @@ params = struct;
 sys = Quadrotorload(params);
 sys.controller = @controller;
 
-
 %% Generate obstacle avoiding trajectory
-traj = traj_gen_QRL_polyhedron(sys);
+% start and goal states and state constraints
+x0 = [-12;0;0;0;0;0;0;0];
+xF = [0;0;0;0;0;0;0;0];
+xU = [2; 2; pi/2; pi/2; 5; 5; 10; 10];
+xL = [-13; -13; -xU(3:end)];
+
+% number of time steps
+N=80;
+
+% obstacles
+O ={Polyhedron('V',[-6 -5.5; -6 xU(2)+0.1; -7 -5.5; -7 xU(2)+0.1]),...
+    Polyhedron('V',[-6 -7.5; -6 xL(2)-0.1; -7 -7.5; -7 xL(2)-0.1])};
+
+% initial guess
+xinit = zeros(length(xF),N+1);
+xinit(1,1:N/2-2) = linspace(x0(1),-7,N/2-2);
+xinit(1,N/2-1:N/2+1) = linspace(-7,-6,3);
+xinit(1,N/2+2:end) = linspace(-6,xF(1),N/2);
+xinit(2,1:N/2-2) = linspace(x0(2),-6.5,N/2-2);
+xinit(2,N/2-1:N/2+1) = linspace(-6.5,-6.5,3);
+xinit(2,N/2+2:end) = linspace(-6.5,xF(2),N/2);
+
+% trajectory generation
+traj = traj_gen_QRL_polyhedron(sys,O,x0,xF,xU,xL,xinit,N);
 %% Generate trajectory to track
 % load trajectory
 % time = traj.t;
@@ -31,7 +53,7 @@ traj = traj_gen_QRL_polyhedron(sys);
 %% Simulate System
 solver = @ode45;
 tspan = [0,10];
-x0 = [-10.5;-10.5;0;0;0;0;0;0];
+% x0 = [-10.5;-10.5;0;0;0;0;0;0];
 sol = sys.simulate(tspan, x0, solver);
 %% Plot
 
