@@ -18,7 +18,7 @@ else % quadrotor with load
     xf.ub = xf.lb;
 end
 
-input.ub = 25*ones(2,1);
+input.ub = 15*ones(2,1);
 input.lb = zeros(2,1);
 
 % x0.lb = [-10.5;-10.5;0;0;0;0];

@@ -7,7 +7,9 @@ addpath(genpath([pwd, '/controllers/']));
 addpath(genpath([pwd, '/gen/']));
 soln = load([pwd, '/traj_opt_ayush/soln.mat']);
 params = struct;
-% params.l = 0.5;
+% params.mQ = 3;
+% params.mL = 1;
+% params.lQ = 0.1;
 sys = Quadrotorload(params);
 
 %% 

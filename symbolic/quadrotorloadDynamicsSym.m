@@ -24,7 +24,7 @@ fvec = [dyL;
 gvec = [zeros(4,2);
     -(sin(phiL)/(mQ+mL))*cos(phiQ-phiL), 0;
     (cos(phiL)/(mQ+mL))*cos(phiQ-phiL), 0;
-    -sin(phiQ-phiL)/(mQ*l),  0;
+    sin(phiQ-phiL)/(mQ*l),  0;
     0, 1/JQ]*[1, 1;-lQ, lQ];
 
 ddX = fvec + gvec*U;

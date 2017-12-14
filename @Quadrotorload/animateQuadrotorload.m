@@ -16,8 +16,8 @@ opts_default.vid.FrameRate = 24;
 
 
 % initialize the animation figure and axes
-    figure_x_limits = [-2 2];
-    figure_y_limits = [-2 2];
+    figure_x_limits = [-12 12];
+    figure_y_limits = [-5 12];
     figure_z_limits = [0 1] ;
     fig1 = figure;
 
@@ -98,7 +98,7 @@ end
 L_cable = obj.l;
     
 
-hist = 5000 ;
+hist = 1 ;
 
 %% animate
     for i=1:length(t)
@@ -106,15 +106,15 @@ hist = 5000 ;
         
         plot(x(max(1,i-hist):i, 1), x(max(1,i-hist):i, 2), 'k') ;
         if xd_flag
-            l = plot(xd(max(1,i-hist):i, 1), xd(max(1,i-hist):i, 2), 'og','linewidth',6);
+            l = plot(xd(max(1,i-hist):i, 1), xd(max(1,i-hist):i, 2), 'og','linewidth',1);
             l.Color(4) = 0.4;
         end
     %         plot3(x(max(1,i-hist):i, 1)-L*x(max(1,i-hist):i,7), x(max(1,i-hist):i, 2)-L*x(max(1,i-hist):i,8), x(max(1,i-hist):i, 3)-L*x(max(1,i-hist):i,9), 'r') ;
             s = sprintf('Running\n t = %1.2fs \n 1/%d realtime speed',t(i), RATE/25);
             text(x(i,1)-1.5,x(i,2)+1.5,s,'FontAngle','italic','FontWeight','bold');
         drawnow;
-        figure_x_limits_ = figure_x_limits+x(i,1);
-        figure_y_limits_ = figure_y_limits+x(i,2);
+        figure_x_limits_ = figure_x_limits;%+x(i,1);
+        figure_y_limits_ = figure_y_limits;%+x(i,2);
         set(axes1,'XLim',figure_x_limits_,'YLim',figure_y_limits_);
         if opts.vid.MAKE_MOVIE
             M(:,i) = getframe; 
@@ -159,7 +159,7 @@ function drawQuadrotorload(parent,x,l)
     set(s.qhandle2,'Color','b', 'LineWidth',2);
     set(s.qhandle3,'Color','b', 'LineWidth',2);
     set(s.cable,'Color','b');
-    s.hload = scatter(yL,zL, 'rs', 'LineWidth',8) ;
+    s.hload = scatter(yL,zL, 'rs', 'LineWidth',1) ;
     
     
     grid on;
