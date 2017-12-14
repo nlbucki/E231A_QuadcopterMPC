@@ -5,15 +5,16 @@ user = 'ayush';
 % addpath(genpath([pwd, '/@Quadrotorload']));
 addpath(genpath([pwd, '/controllers/']));
 addpath(genpath([pwd, '/gen/']));
-
+soln = load([pwd, '/traj_opt_ayush/soln.mat']);
 params = struct;
+% params.l = 0.5;
 sys = Quadrotorload(params);
 
 %% 
 numStates = sys.nDof;
 numInputs = sys.nAct;
 addBounds;
-N = 20; % number of grid points 
+N = 30; % number of grid points 
 
 x = sdpvar(numStates, 2*N+1);
 u = sdpvar(numInputs, 2*N+1);
@@ -38,12 +39,13 @@ for i = 1:2*N+1
     constraints = [constraints, input.lb<=u(:, i)<=input.ub];
 %     constraints = obstacle1(sys,constraints, x(:, i), 0, 0, 2);
 %     constraints = obstacle1(sys, constraints, x(:, i), 0, 3, 2);
+    constraints = superEllipse(sys, constraints, x(:, i), 0, -15, 3, 14.9);
+    constraints = superEllipse(sys, constraints, x(:, i), 0, 15, 3, 14.9);
 end
 
 % system dynamics (collocation constraints)
 for i = 1:N
     constraints = [constraints, xMidPt(i) == 0.5*(xk(i) + xk1(i)) + (hk/8)*(fdyn(xk(i), uk(i)) - fdyn(xk1(i), uk1(i)))];
-%     constraints = [constraints, uMidPt(i) == 0.5*(uk(i) + ul
     constraints = [constraints, xk1(i) == xk(i) + (1/6)*hk*(fdyn(xk(i), uk(i)) + 4*fdyn(xMidPt(i), uMidPt(i)) + fdyn(xk1(i), uk1(i)))];
 end
 
@@ -52,7 +54,7 @@ constraints = [constraints, x0.lb <= x(:, 1) <= x0.ub]; % init condition
 constraints = [constraints, xf.lb <= x(:, end) <= xf.ub]; % final condition
 
 
-% constraints = [constraints, [0;-2.5;zeros(4, 1)]<=xk(ceil(N/2))<=[0;2.5;zeros(4, 1)]]; % window constraint
+% constraints = [constraints, [0;-2.5;zeros(6, 1)]<=xk(ceil(N/2))<=[0;2.5;zeros(6, 1)]]; % window constraint
 %% add cost
 cost = 0;
 
@@ -60,7 +62,17 @@ for i = 1:N
     cost = cost + (hk/6)*(norm(uk(i))^2 + 4*norm(uMidPt(i))^2 + norm(uk1(i))^2);
 end
 %% call nlp solver
-options = sdpsettings('verbose', true, 'solver', 'IPOPT');
+xL = linspace(x0.lb(1), xf.lb(1), 2*N+1);
+xinit = [xL;zeros(numStates-1, 2*N+1)];
+uinit = zeros(numInputs, 2*N+1);
+Tfinit = 10;
+options = sdpsettings('solver', 'IPOPT', 'usex0', true, 'showprogress', 1,'verbose', 3);
+% assign(x,soln.x);
+% assign(u, soln.u);
+% assign(Tf, soln.Tf);
+assign(x, xinit);
+assign(u, uinit);
+assign(Tf, Tfinit);
 
 tic
 opt = optimize(constraints, cost, options);
@@ -90,6 +102,29 @@ for i = 1:Ninterp
     uinterp(:, i) = pwPoly2(tspan, u, tinterp(i)); % From: https://github.com/MatthewPeterKelly/OptimTraj
 end
 % 
-
+xinterpfcn = @(t)pwPoly3(tspan, x, ddxk, t);
+uinterpfcn = @(t)pwPoly2(tspan, u, t);
 %% run sim
 
+controlParams.ufcn = uinterpfcn;
+controlParams.xfcn = xinterpfcn;
+sys.controller = @controller;
+sys.controlParams = controlParams;
+
+
+tspanSim = [0,tspan(end)];
+x0Sim = x(:, 1);
+solver = @ode45;
+sol = sys.simulate(tspanSim, x0Sim, solver);
+
+data.x = sol.y;
+data.t = sol.x;
+xinterpSim = zeros(numStates, length(sol.x));
+for i = 1:length(sol.x)
+    xinterpSim(:, i) = xinterpfcn(sol.x(i));
+end
+
+data.xd = xinterpSim';
+data.td = sol.x';
+
+animateQuadrotorload(sys, data);
