@@ -81,8 +81,13 @@ methods
         end
     end
 
-    function sol = simulate(obj, tspan, x0, solver)
-        odefun = @(t,x)systemDynamics(obj, t, x);
+    function sol = simulate(obj, tspan, x0, solver,varargin)
+        if nargin > 4
+            u = varargin{1};
+            odefun = @(t,x)systemDynamics(obj, t, x,u);
+        else
+            odefun = @(t,x)systemDynamics(obj, t, x);
+        end
         sol = solver(odefun, tspan, x0);
     end
     

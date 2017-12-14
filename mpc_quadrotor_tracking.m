@@ -34,43 +34,6 @@ params.mpc.P = params.mpc.Q;
 
 %% Load reference trajectory
 
-% load('trajectory.mat');
-% tref =  time(1):params.mpc.Ts:time(end);
-% uref = [interp1(time',control',tref','spline')]';
-% xref = [interp1(time',states',tref','linear')]';
-% 
-% figure
-% plot(time,states(1,:),'r',tref,xref(1,:),'*b'); hold on
-% plot(time,states(2,:),':r',tref,xref(2,:),'sb');
-% figure;
-% subplot(2,1,1);
-% plot(time,control(1,:),'r',tref,uref(1,:),'b'); grid on;grid minor
-% subplot(2,1,2);
-% plot(time,control(2,:),'r',tref,uref(2,:),'b');grid on; grid minor
-
-% fixed point reference trajectory
-% --------------------------------
-% waypoint = [1;1;0;0;0;0];
-% xref = repmat(waypoint,1,(params.mpc.M+params.mpc.N));
-% uref = (sys.mQ*sys.g/2)*ones(2,params.mpc.M+params.mpc.N);
-
-% waypoints
-% --------
-% xref = [zeros(sys.nDof,floor(params.mpc.M/2)), repmat([5;5;0;0;0;0],1,params.mpc.M+params.mpc.N-floor(params.mpc.M/2))];
-% uref = (sys.mQ*sys.g/2)*ones(2,params.mpc.M+params.mpc.N);
-
-% [xref, uref] = generate_ref_trajectory(sys,params.mpc);
-
-% circular trajectory
-% -------------------
-% tref = [0:params.mpc.Ts:params.mpc.Tf];
-% xf = @(t) [sin(2*pi*0.01*t);0;0;0;0;0];
-% xref = [];
-% for i = 1:length(tref)
-%     xref = [xref,xf(tref(i))];
-% end
-% uref = (sys.mQ*sys.g/2)*ones(2,params.mpc.M+params.mpc.N);
-
 % diff-flat trajectory
 % --------------------
 tref = [0:params.mpc.Ts:params.mpc.Tf];
@@ -93,7 +56,7 @@ x0  = xref(:,1);
 sys_response.x = zeros(sys.nDof,params.mpc.M+1);
 sys_response.u = zeros(sys.nAct,params.mpc.M);
 sys_response.x(:,1) = x0;
-
+solver = @ode45;
 % calculating input over the loop
 for impc = 1:params.mpc.M
     fprintf('calculting input for T = %.4f\n',impc*params.mpc.Ts);
@@ -107,15 +70,24 @@ for impc = 1:params.mpc.M
 %     urefk = repmat(uref(:,impc),1,params.mpc.N+1);
     
     ctlk = solve_cftoc(params.mpc.Ts,xk,xrefk,urefk,sys,params);
+    uk = ctlk.uOpt(:,1);
     
     %% forward simulation
-    f0 = act_sys.systemDynamics([],xrefk(:,1),urefk(:,1));
-    [A,B] = act_sys.linearizeQuadrotor(xrefk(:,1),urefk(:,1));
+    % discrete -linear- simulation
+%     f0 = act_sys.systemDynamics([],xrefk(:,1),urefk(:,1));
+%     [A,B] = act_sys.linearizeQuadrotor(xrefk(:,1),urefk(:,1));
+%     dxk = f0 + A*(xk-xrefk(:,1)) + B*(uk-urefk(:,1));
+%     xk_next = xk + params.mpc.Ts*dxk;
     
-    uk = ctlk.uOpt(:,1);
-    dxk = f0 + A*(xk-xrefk(:,1)) + B*(uk-urefk(:,1));
-    %
-    sys_response.x(:,impc+1) = xk + params.mpc.Ts*dxk;
+    % discrete -nonlinear-simuation
+%     f = act_sys.systemDynamics([],xk,uk);
+%     xk_next = xk + params.mpc.Ts*f;
+    
+    % continuous -nonlinear-simulation
+    sol = act_sys.simulate([tref(impc),tref(impc+1)], xk, solver,uk); 
+    xk_next = sol.y(:,end);
+    
+    sys_response.x(:,impc+1) = xk_next;
     sys_response.u(:,impc) = uk;
 end
 
