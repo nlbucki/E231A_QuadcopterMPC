@@ -130,7 +130,9 @@ opts.t = sys_response.t;
 opts.x = sys_response.x';
 opts.td = time';
 opts.xd = xref(:,1:params.mpc.M+1)';
+
 opts.vid.MAKE_MOVIE = false;
+opts.vid.filename  = 'results/traj_load_inverted_pendelum';
 sys.animateQuadrotorload(opts);
 
 
