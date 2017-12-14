@@ -1,18 +1,22 @@
 function traj = traj_gen_QRL_polyhedron(obj)
 % FUNCTION INPUTS:
-x0 = [-10.5;-10.5;0;0;0;0;0;0];
+x0 = [-12;0;0;0;0;0;0;0];
 xF = [0;0;0;0;0;0;0;0];
 % xU = inf(8,1);
-xU = [15; 15; pi/2; pi/2; inf; inf; inf; inf];    % last two might be defined smarter
-xL = -xU;
-uU = [obj.Fmax; obj.Mmax];
-uL = [obj.Fmin; obj.Mmin];
+xU = [2; 2; pi/2; pi/2; 5; 5; 10; 10];
+xL = [-13; -13; -xU(3:end)];
+uU = [obj.F1max; obj.F2max];
+uL = [obj.F1min; obj.F2min];
 N = 80;
 
 % initial guess
 xinit = zeros(length(xF),N+1);
-xinit(1,:) = linspace(x0(1),xF(1),N+1);
-xinit(2,:) = linspace(x0(2),xF(2),N+1);
+xinit(1,1:N/2-2) = linspace(x0(1),-7,N/2-2);
+xinit(1,N/2-1:N/2+1) = linspace(-7,-6,3);
+xinit(1,N/2+2:end) = linspace(-6,xF(1),N/2);
+xinit(2,1:N/2-2) = linspace(x0(2),-6.5,N/2-2);
+xinit(2,N/2-1:N/2+1) = linspace(-6.5,-6.5,3);
+xinit(2,N/2+2:end) = linspace(-6.5,xF(2),N/2);
 
 QR_width = obj.wQ;
 QR_height = obj.hQ;
@@ -22,8 +26,8 @@ load_r = obj.wL;
 
 % Generate obstacle
 % LATER: FUNCTION INPUT
-O ={Polyhedron('V',[-2 1; -20 1; -2 -2; -20 -2])};%,...
-%     Polyhedron('V',[0 -3; 0 -10; 6 -3; 6 -10])};
+O ={Polyhedron('V',[-6 -5.5; -6 xU(2)+0.1; -7 -5.5; -7 xU(2)+0.1]),...
+    Polyhedron('V',[-6 -7.5; -6 xL(2)-0.1; -7 -7.5; -7 xL(2)-0.1])};
 
 %% Generate quadrotor shape (at "zero" position)
 QR = Polyhedron('V',[-QR_width/2 0; QR_width/2 0; -QR_width/2 QR_height;...
@@ -145,6 +149,12 @@ hold on
 for m=1:M
     plot(O{m},'alpha',0.5)
 end
+plot([xL(1) xL(1)],[xL(2) xU(2)],'k','LineWidth',2)
+plot([xU(1) xU(1)],[xL(2) xU(2)],'k','LineWidth',2)
+plot([xL(1) xU(1)],[xU(2) xU(2)],'k','LineWidth',2)
+plot([xL(1) xU(1)],[xL(2) xL(2)],'k','LineWidth',2)
+
+plot(xinit(1,:),xinit(2,:),'r')
 for k=1:N+1
     plot(Polyhedron('H',[QR.H(:,1:2)*Rot(traj.x(4,k))',...
         QR.H(:,2+1)+QR.H(:,1:2)*Rot(traj.x(4,k))'*...

@@ -21,7 +21,7 @@ sys.controller = @controller_dlqr_path;
 %% Generate obstacle avoiding trajectory
 traj = traj_gen_QRL_polyhedron(sys);
 %% Generate trajectory to track
-% load trajectory
+load traj_gen_QRL
 time = traj.t;
 states = traj.x;
 control = traj.u;
@@ -31,7 +31,7 @@ sys.controlParams = struct('time',time,'states',states,'control',control);
 %% Simulate System
 solver = @ode45;
 tspan = [0,10];
-x0 = [-10.5;-10.5;0;0;0;0];
+x0 = states(:,1);
 sol = sys.simulate(tspan, x0, solver);
 %% Plot
 
@@ -63,5 +63,5 @@ opts.t = time;
 opts.x = states;
 opts.vid.MAKE_MOVIE = false;
 opts.vid.filename = './results/vid1';
-sys.animateQuadrotor(opts);
+sys.animateQuadrotorload(opts);
 

@@ -15,13 +15,19 @@ end
 
 % Desired state
 xd = params.states(:, t_index);
-ud = params.control(:, t_index);
+
+if t_index <= size(params.control, 2)
+    ud = params.control(:, t_index);
+else
+    ud = params.control(:,end);
+end
 
 % Linearize about desired trajectory position
-[A,B] = obj.discretizeLinearizeQuadrotor(0.1, xd, ...
+[A,B] = obj.discretizeLinearizeQuadrotorload(0.1, xd, ...
     ud);
 
 K = dlqr(A,B, 5*eye(dof), eye(nAct));
 
-u = -K*(x-xd) + [obj.mQ*obj.g;obj.mQ*obj.g]./2;
+u = -K*(x-xd) + (obj.mQ + obj.mL)*obj.g/2*ones(2,1)*cos(x(4));
+
 end
