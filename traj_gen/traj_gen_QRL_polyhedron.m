@@ -1,4 +1,4 @@
-function traj = traj_gen_QRL_polyhedron(obj,O,x0,xF,xU,xL,xinit,N)
+function traj = traj_gen_QRL_polyhedron(obj,O,x0,xF,xU,xL,xinit,N,TCfolder)
 % FUNCTION INPUTS:
 % x0 = [-12;0;0;0;0;0;0;0];
 % xF = [0;0;0;0;0;0;0;0];
@@ -165,19 +165,27 @@ for k=1:N+1
         L.H(:,2+1)+L.H(:,1:2)*Rot(traj.x(3,k))'*traj.x(1:2,k)]),...
         'color','r','alpha',0)
 end
+ylim([xL(2) xU(2)])
+xlim([xL(1) xU(1)])
 axis equal
 legend([h1 h2 h3],{'optimized trajectory','initial path',...
-    'position state constraints'},'Location','bestoutside')
+    'position state constraints'},'Location','southeast')
+filename = ['results\' TCfolder '\traj'];
+savefig(filename)
 
 figure
 plot(traj.t,traj.x)
 title('States vs. time')
 legend('y_L','z_L','\phi_L','\phi_Q','yd_L','zd_L','\phi d_L','\phi d_Q')
+filename = ['results\' TCfolder '\states'];
+savefig(filename)
 
 figure
 plot(traj.t(1:end-1),traj.u)
 title('Inputs vs. time')
 legend('u_1','u_2')
+filename = ['results\' TCfolder '\inputs'];
+savefig(filename)
 
 % Display the amount of time the planned motion would take
 disp(['Reaching the target takes ' num2str(traj.t(end)) 's.'])
