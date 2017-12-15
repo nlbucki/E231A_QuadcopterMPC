@@ -27,8 +27,9 @@ yalmip('clear')
 % end
 
 %% load optimized results
-folder = './results/Testcase_1_keyhole_2m/';
-% folder = './results/Testcase_3_triangles/';
+% folder = './results/Testcase_1_keyhole_2m/';
+% folder = './results/Testcase_2_inverted_pendulum/';
+folder = './results/Testcase_3_triangles/';
 filename = 'workspace.mat';
 
 DATA = load(strcat(folder,filename));
@@ -36,7 +37,7 @@ xref = DATA.traj.x;
 uref = DATA.traj.u;
 tref = DATA.traj.t;
 
-N = 5;
+N = 8;
 
 xref = [xref, repmat(xref(:,end),1,N)];
 uref = [uref, repmat(uref(:,end),1,N)];
@@ -72,14 +73,14 @@ params.mpc.N = N;
 
 % gains
 % params.mpc.Q = diag([100,100,10,10,1,1,1,1]);
-params.mpc.Q = 1*eye(sys.nDof);
-params.mpc.R = 1*eye(sys.nAct);
+params.mpc.Q = 100*eye(sys.nDof);
+params.mpc.R = 0.01*eye(sys.nAct);
 params.mpc.P = params.mpc.Q;    
 
 sys.controlParams = params;
 
 %% MPC Control 
-[mpc_response] = sys.mpc_load_Tracking(x0,tref,xref,uref,'CNL');
+[mpc_response] = sys.mpc_load_Tracking(x0,tref,xref,uref,'DNL');
 
 %% DLQR Control 
 [dlqr_response] = sys.dlqr_load_Tracking(x0,tref,xref,uref,'CNL');
@@ -109,7 +110,7 @@ drawQuadrotorload(mpc_response.x(:,end),sys.l);
 % inputs
 fig2 = figure; 
 subplot(2,1,1);hold on;
-l_ref = plot(tref(1:end-1),uref(1,:),'k','linewidth',1);
+l_ref = plot(tref(1:end-1),uref(1,:),'-k','linewidth',1);
 l_mpc = plot(mpc_response.t(1:end-1),mpc_response.u(1,:),'g','linewidth',2);
 l_dlqr = plot(dlqr_response.t(1:end-1),dlqr_response.u(1,:),'--r','linewidth',2);
 leg = latex_legend({'REFERENCE','MPC','DLQR'});
@@ -117,7 +118,7 @@ leg.AutoUpdate = 'off';
 latex_title('F1');grid on; grid minor;
 latex_xlabel('t [s]');latex_ylabel('$F_1$ [N]');
 subplot(2,1,2);hold on;
-l_ref = plot(tref(1:end-1),uref(2,:),'k','linewidth',1);
+l_ref = plot(tref(1:end-1),uref(2,:),'-k','linewidth',1);
 l_mpc = plot(mpc_response.t(1:end-1),mpc_response.u(2,:),'g','linewidth',2);
 l_dlqr = plot(dlqr_response.t(1:end-1),dlqr_response.u(2,:),'--r','linewidth',2);
 leg = latex_legend({'REFERENCE','MPC','DLQR'});
@@ -204,7 +205,7 @@ keyboard;
 %% Animate
 opts.t = mpc_response.t;
 opts.x = mpc_response.x';
-opts.td = time';
+opts.td = tref';
 opts.xd = xref';
 opts.O = DATA.O;
 
