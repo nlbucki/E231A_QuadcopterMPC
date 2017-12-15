@@ -5,7 +5,7 @@ function plotQuadcopterPolyhedron(x,QR,L,obj,O,color)
     [~,N]=size(x);
     N=N-1;
     [~,M]=size(O);
-    plot(x(1,:),x(2,:),'x-','color',color)
+    plot(x(1,:),x(2,:),'x-')
     xlabel('y')
     ylabel('z')
     title('Generated path with obstacle avoidance')

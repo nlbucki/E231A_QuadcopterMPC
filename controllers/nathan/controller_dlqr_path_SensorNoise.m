@@ -2,8 +2,8 @@ function u = controller_dlqr_path_SensorNoise(obj, t, x)
 % Insert Sensor Noise
 mean=0;
 std=sqrt(1);
-% w= random('norm', mean, std);
-w = randn(8,1);
+w= random('norm', mean, std);
+%w = randn(8,1);
 x=x+w;
 
 dof = obj.nDof;

@@ -35,14 +35,14 @@ control_traj = traj.u;
 sys.controlParams = struct('time',time_traj,'states',states_traj,'control',control_traj);
 %% Assign Controller
 % Create Copies of Object
-k=3; %number of controllers
+k=1; %number of controllers
 Quad=cell(1,k);
-for i=1:k
+for i=1:1
     Quad{i}=sys;
 end
 Quad{1}.controller = @controller_dlqr_path;
-Quad{2}.controller = @controller_dlqr_path_SensorNoise;
-Quad{3}.controller = @controller_dlqr_path_InputDisturbance;
+% Quad{2}.controller = @controller_dlqr_path_SensorNoise;
+% Quad{3}.controller = @controller_dlqr_path_InputDisturbance;
 %% Simulate System
 solver = @ode45;
 tspan = [0,10];
@@ -64,14 +64,14 @@ end
 %% Plot States and Control Inputs
 
 figure
-plot(time, states);
+plot(time{1}, states{1});
 legend('y','z', '\phi', 'dy', 'dz', 'dphi');
 xlabel('time (s)');
 ylabel('states');
 grid on;
 
 figure
-plot(time, control);
+plot(time{1}, control{1});
 legend('F_1', 'F_2');
 xlabel('time (s)');
 ylabel('inputs');
@@ -81,31 +81,31 @@ color='g'; %Color of Trajectory
 figure;
 hold on;
 plot(traj.x(1,:),traj.x(2,:),'x-');
-plotQuadcopterPolyhedron(states,QR,L,sys,O,color);
+plotQuadcopterPolyhedron(states{1},QR,L,Quad{1},O,color);
 legend('Generated Trajectory', 'True Trajectory');
 %% 
-figure;
-x_interp=interp1(time,states(1,:),traj.t);
-y_interp=interp1(time,states(2,:),traj.t);
-figure;
-hold on;
-plot(traj.t,x_interp-traj.x(1,:))
-plot(traj.t,y_interp-traj.x(2,:),'r');
-legend('\delta x', '\delta y');
-title('Derivation from trajectory');
-
-figure
-hold on;
-plot(traj.x(1,:),traj.x(2,:),'x-')
-xlabel('y')
-ylabel('z')
-plot(states(1,:),states(2,:),'x-');
-legend('Generated path with obstacle avoidance','True Path tracked by LQR');
-hold on
-
+% figure;
+% x_interp=interp1(time,states(1,:),traj.t);
+% y_interp=interp1(time,states(2,:),traj.t);
+% figure;
+% hold on;
+% plot(traj.t,x_interp-traj.x(1,:))
+% plot(traj.t,y_interp-traj.x(2,:),'r');
+% legend('\delta x', '\delta y');
+% title('Derivation from trajectory');
+% 
+% figure
+% hold on;
+% plot(traj.x(1,:),traj.x(2,:),'x-')
+% xlabel('y')
+% ylabel('z')
+% plot(states(1,:),states(2,:),'x-');
+% legend('Generated path with obstacle avoidance','True Path tracked by LQR');
+% hold on
+% 
 %% Animate
-opts.t = time;
-opts.x = states;
+opts.t = time{1};
+opts.x = states{1};
 opts.vid.MAKE_MOVIE = false;
 opts.vid.filename = './results/vid1';
 sys.animateQuadrotorload(opts);
