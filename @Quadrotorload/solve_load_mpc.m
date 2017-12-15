@@ -1,4 +1,4 @@
-function [ctl] = solve_mpc(obj,Ts,xk,xrefk,urefk)
+function [ctl] = solve_load_mpc(obj,Ts,xk,xrefk,urefk,FINAL_CONST_FLAG)
 %% function to Constrained Finite Time Optimal Control
 yalmip('clear');
 
@@ -48,7 +48,9 @@ for ii = 1:N
 end   
 % terminal cost
 cost = cost + (x(:,N+1)-xrefk(:,N+1))'*P*(x(:,N+1)-xrefk(:,N+1));
-
+if FINAL_CONST_FLAG
+    constraints = [constraints, x(:,N+1)==xrefk(:,N+1)];
+end
 % reference constraints
 % for ij = 1:N+1
 %     constraints = [constraints,...
@@ -57,7 +59,7 @@ cost = cost + (x(:,N+1)-xrefk(:,N+1))'*P*(x(:,N+1)-xrefk(:,N+1));
 % end
 
 %% optimization
-options = sdpsettings('verbose', true,'solver','quadprog');
+options = sdpsettings('verbose', false,'solver','IPOPT');
 options.ipopt.max_iter = 10000;
 sol = optimize(constraints,cost,options);
 

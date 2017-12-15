@@ -170,8 +170,9 @@ methods
     end
     
     [A, B] = discretizeLinearizeQuadrotorload(obj, Ts, xk, uk);
-    [sys_response] = mpc_load_Tracking(obj,x0,tref,xref,uref,varargin);
-    [ctl] = solve_load_mpc(obj,Ts,xk,xrefk,urefk);
+    [mpc_response] = mpc_load_Tracking(obj,x0,tref,xref,uref,varargin);
+    [ctl] = solve_load_mpc(obj,Ts,xk,xrefk,urefk,FINAL_CONST_FLAG);
+    [dlqr_response] = dlqr_load_Tracking(obj,x0,tref,xref,uref,type,varargin)
     
     % animation
     animateQuadrotorload(obj,opts_in)

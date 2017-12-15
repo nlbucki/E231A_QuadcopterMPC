@@ -16,7 +16,7 @@ opts_default.vid.FrameRate = 24;
 
 
 % initialize the animation figure and axes
-    figure_x_limits = [-2 2];
+    figure_x_limits = [-3 3];
     figure_y_limits = [-2 2];
     figure_z_limits = [0 1] ;
     fig1 = figure;
@@ -56,7 +56,8 @@ opts_default.vid.FrameRate = 24;
     axis equal ;
     
     % get inputs
-    opts = struct_overlay(opts_default,opts_in);
+    SO_OPTIONS.AllowNew = true;
+    opts = struct_overlay(opts_default,opts_in,SO_OPTIONS);
     % extract data
     RATE = opts.RATE;
     t = opts.t;
@@ -70,6 +71,13 @@ opts_default.vid.FrameRate = 24;
     if size(x,2)>size(x,1)
         x = x';
     end
+    if isrow(td)
+        td = td';
+    end
+    if size(xd,2)>size(xd,1)
+        xd = xd';
+    end    
+    
     box on;
     
     [t, x] = even_sample(t, x, RATE,opts.interp_type);
@@ -98,24 +106,27 @@ end
 L_cable = obj.l;
     
 
-hist = 1 ;
+hist = 100 ;
 
 %% animate
     for i=1:length(t)
         drawQuadrotorload(axes1, x(i,:)',L_cable);
         
-        plot(x(max(1,i-hist):i, 1), x(max(1,i-hist):i, 2), 'k') ;
+        plot(x(max(1,i-hist):i, 1), x(max(1,i-hist):i, 2), 'r','linewidth',2) ;hold on;
         if xd_flag
-            l = plot(xd(max(1,i-hist):i, 1), xd(max(1,i-hist):i, 2), 'og','linewidth',1);
+            l = plot(xd(max(1,i-hist):i, 1), xd(max(1,i-hist):i, 2), 'g','linewidth',3);
             l.Color(4) = 0.4;
         end
     %         plot3(x(max(1,i-hist):i, 1)-L*x(max(1,i-hist):i,7), x(max(1,i-hist):i, 2)-L*x(max(1,i-hist):i,8), x(max(1,i-hist):i, 3)-L*x(max(1,i-hist):i,9), 'r') ;
-            s = sprintf('Running\n t = %1.2fs \n 1/%d realtime speed',t(i), RATE/25);
-            text(x(i,1)-1.5,x(i,2)+1.5,s,'FontAngle','italic','FontWeight','bold');
-        drawnow;
-        figure_x_limits_ = figure_x_limits;%+x(i,1);
-        figure_y_limits_ = figure_y_limits;%+x(i,2);
+%         s = sprintf('Running\n t = %1.2fs \n 1/%d realtime speed',t(i), RATE/25);
+%         text(x(i,1)-1.5,x(i,2)+1.5,s,'FontAngle','italic','FontWeight','bold');
+        for m=1:length(opts.O)
+            plot(opts.O{m},'alpha',0.5); hold on;
+        end
+        figure_x_limits_ = figure_x_limits+x(i,1);
+        figure_y_limits_ = figure_y_limits+x(i,2);
         set(axes1,'XLim',figure_x_limits_,'YLim',figure_y_limits_);
+        drawnow;
         if opts.vid.MAKE_MOVIE
             M(:,i) = getframe; 
             % Write data to video file
@@ -147,7 +158,7 @@ function drawQuadrotorload(parent,x,l)
     R = [cos(phiQ), -sin(phiQ);
             sin(phiQ), cos(phiQ)];
     
-    points = [yQ;zQ] + R'*base;  
+    points = [yQ;zQ] + R*base;  
     
     cable = [ [yQ; zQ], [yL; zL]];
     
@@ -159,7 +170,7 @@ function drawQuadrotorload(parent,x,l)
     set(s.qhandle2,'Color','b', 'LineWidth',2);
     set(s.qhandle3,'Color','b', 'LineWidth',2);
     set(s.cable,'Color','b');
-    s.hload = scatter(yL,zL, 'rs', 'LineWidth',1) ;
+    s.hload = scatter(yL,zL,40,'rs','filled');
     
     
     grid on;

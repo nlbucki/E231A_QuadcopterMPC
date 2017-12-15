@@ -13,9 +13,7 @@ close all
 yalmip('clear')
 
 
-%% Build quadrotor system
-params = struct;
-sys = Quadrotorload(params);
+
 
 %% Load reference trajectory
 % diff-flat trajectory
@@ -32,15 +30,33 @@ sys = Quadrotorload(params);
 % end
 
 %% load optimized results
-load('./results/traj_load_inverted_pendelum.mat');
-xref = traj.x;
-uref = traj.u;
-tref = traj.t;
+folder = './results/Testcase_1_keyhole_2m/';
+filename = 'matlab_workspace_TC1.mat';
 
-N = 3;
+DATA = load(strcat(folder,filename));
+xref = DATA.traj.x;
+uref = DATA.traj.u;
+tref = DATA.traj.t;
+
+N = 5;
 
 xref = [xref, repmat(xref(:,end),1,N)];
 uref = [uref, repmat(uref(:,end),1,N)];
+
+%% Build quadrotor system
+params = struct;
+% input bounds
+bounds.inputs.lb = [0; 0];
+bounds.inputs.ub = [15;15]; 
+% state bounds 
+bounds.states.lb = DATA.xL;
+bounds.states.ub = DATA.xU;
+sys = Quadrotorload(params,bounds);
+
+%% acutal model
+act_sys = sys;
+act_sys.mQ = 1.1*sys.mQ;
+
 
 %% Initial condition
 % x0 = [-.5;-.5;0;0;0;0];
@@ -64,72 +80,132 @@ params.mpc.P = params.mpc.Q;
 
 sys.controlParams = params;
 
+%% DLQR Control 
+[dlqr_response] = sys.dlqr_load_Tracking(x0,tref,xref,uref,'CNL');
 
-%% Control 
-[sys_response] = sys.mpc_load_Tracking(x0,tref,xref,uref,'DL');
+%% MPC Control 
+[mpc_response] = sys.mpc_load_Tracking(x0,tref,xref,uref,'CNL');
 
 %% plots
-time = sys_response.t;
-figure
-subplot(2,3,1);
-plot(time', sys_response.x(1,:)');
+xref = DATA.traj.x;
+uref = DATA.traj.u;
+
+% trajectory
+fig1 = figure; hold on;
+l_ref = plot(xref(1,:),xref(2,:),'k','linewidth',1);
+l_mpc = plot(mpc_response.x(1,:),mpc_response.x(2,:),'g','linewidth',2);
+l_dlqr = plot(dlqr_response.x(1,:),dlqr_response.x(2,:),'--r','linewidth',2);
+for i = 1:length(DATA.O)
+    plot(DATA.O{i},'alpha',0.5); hold on;
+end
+leg = latex_legend({'REFERENCE','MPC','DLQR','OBSTACLES'});
+leg.AutoUpdate = 'off';
+latex_title('TRAJECTORY');
+latex_xlabel('y [m]');latex_ylabel('z [m]');
+drawQuadrotorload(mpc_response.x(:,1),sys.l);
+drawQuadrotorload(mpc_response.x(:,end),sys.l);
+
+% inputs
+fig2 = figure; 
+subplot(2,1,1);hold on;
+l_ref = plot(tref(1:end-1),uref(1,:),'k','linewidth',1);
+l_mpc = plot(mpc_response.t(1:end-1),mpc_response.u(1,:),'g','linewidth',2);
+l_dlqr = plot(dlqr_response.t(1:end-1),dlqr_response.u(1,:),'--r','linewidth',2);
+leg = latex_legend({'REFERENCE','MPC','DLQR'});
+leg.AutoUpdate = 'off';
+latex_title('F1');grid on; grid minor;
+latex_xlabel('t [s]');latex_ylabel('$F_1$ [N]');
+subplot(2,1,2);hold on;
+l_ref = plot(tref(1:end-1),uref(2,:),'k','linewidth',1);
+l_mpc = plot(mpc_response.t(1:end-1),mpc_response.u(2,:),'g','linewidth',2);
+l_dlqr = plot(dlqr_response.t(1:end-1),dlqr_response.u(2,:),'--r','linewidth',2);
+leg = latex_legend({'REFERENCE','MPC','DLQR'});
+leg.AutoUpdate = 'off';
+latex_title('F2');grid on; grid minor;
+latex_xlabel('t [s]');latex_ylabel('$F_2$ [N]');
+
+time = mpc_response.t;
+f1 = figure;
+subplot(2,4,1);
+plot(time', mpc_response.x(1,:)','r'); hold on;
+plot(tref',xref(1,:)','*b');legend('y','y_{ref}');
 title('y');
 xlabel('time (s)');
 ylabel('m');
 grid on; grid minor;
-subplot(2,3,2);
-plot(time', sys_response.x(2,:)');
+subplot(2,4,2);
+plot(time', mpc_response.x(2,:)','r');hold on;
+plot(tref',xref(2,:)','*b');legend('z','z_{ref}');
 title('z');
 xlabel('time (s)');
 ylabel('m');
 grid on; grid minor;
-subplot(2,3,3);
-plot(time', (180/pi)*sys_response.x(3,:)');
-title('phi');
+subplot(2,4,3);
+plot(time', (180/pi)*mpc_response.x(3,:)','r');hold on;
+plot(tref',(180/pi)*xref(3,:)','*b');legend('\phi_L','{\phi_L}_{ref}');
+title('phi_L');
+xlabel('time (s)');
+ylabel('degrees'); grid on; grid minor;
+subplot(2,4,4);
+plot(time', (180/pi)*mpc_response.x(4,:)','r');hold on;
+plot(tref',(180/pi)*xref(4,:)','*b');legend('\phi_Q','{\phi_Q}_{ref}');
+title('phi_Q');
 xlabel('time (s)');
 ylabel('degrees');
 grid on; grid minor;
-subplot(2,3,4);
-plot(time', sys_response.x(4,:)');
+
+subplot(2,4,5);
+plot(time', mpc_response.x(5,:)','r');hold on;
+plot(tref',xref(5,:)','*b'); legend('dy','dy_{ref}');
 title('dy');
 xlabel('time (s)');
 ylabel('m/s');
 grid on; grid minor;
-subplot(2,3,5);
-plot(time', sys_response.x(5,:)');
+subplot(2,4,6);
+plot(time', mpc_response.x(6,:)','r');hold on;
+plot(tref',xref(6,:)','*b'); legend('dz','dz_{ref}');
 title('dz');
 xlabel('time (s)');
 ylabel('m/s');
 grid on; grid minor;
-subplot(2,3,6);
-plot(time', sys_response.x(6,:)');
-title('dphi');
+subplot(2,4,7);
+plot(time', mpc_response.x(7,:)','r');hold on;
+plot(tref',xref(7,:)','*b'); legend('dphiL','dphiL_{ref}');
+title('dphi_L');
+xlabel('time (s)');
+ylabel('rad/s');
+grid on; grid minor;
+subplot(2,4,8);
+plot(time', mpc_response.x(8,:)','r');hold on;
+plot(tref',xref(8,:)','*b'); legend('dphiQ','dphiQ_{ref}');
+title('dphi_Q');
 xlabel('time (s)');
 ylabel('rad/s');
 grid on; grid minor;
 
-
 figure;
-plot(sys_response.x(1,:),sys_response.x(2,:),'r','linewidth',2);hold on;
-plot(xref(1,:),xref(2,:),'b','linewidth',2);
+plot(mpc_response.x(1,:),mpc_response.x(2,:),'r','linewidth',2);hold on;
+plot(xref(1,:),xref(2,:),'*b','linewidth',2);
 legend('x','xref');
 grid on; grid minor;
 xlabel('Y');ylabel('Z');
 title('output trajectory');
 
 figure
-plot(time(1:end-1), sys_response.u);
-legend('F_1', 'F_2');
+plot(time(1:end-1), mpc_response.u(1,:),'r','linewidth',2);hold on;
+plot(tref(1:end-1), uref(1,:),'b','linewidth',2);
+legend('F_1', 'F_1 ref');
 xlabel('time (s)');
 ylabel('inputs');
 grid on; grid minor;
 
 keyboard;
 %% Animate
-opts.t = sys_response.t;
-opts.x = sys_response.x';
+opts.t = mpc_response.t;
+opts.x = mpc_response.x';
 opts.td = time';
-opts.xd = xref(:,1:params.mpc.M+1)';
+opts.xd = xref';
+opts.O = DATA.O;
 
 opts.vid.MAKE_MOVIE = false;
 opts.vid.filename  = 'results/traj_load_inverted_pendelum';

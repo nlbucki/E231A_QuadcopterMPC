@@ -1,4 +1,4 @@
-function [sys_response] = mpcTracking(obj,x0,tref,xref,uref,type,varargin)
+function [sys_response] = mpc_load_Tracking(obj,x0,tref,xref,uref,type,varargin)
 %% 
 % Code to implement MPC for trajectory tracking of quadrotor position
 
@@ -25,15 +25,21 @@ for impc = 1:obj.controlParams.mpc.M
     
     %% optimizing for input
     xk = sys_response.x(:,impc);
+
     xrefk = xref(:,impc:(impc+obj.controlParams.mpc.N));
     urefk = uref(:,impc:(impc+obj.controlParams.mpc.N));
     
-%     xrefk = [xref(:,impc), repmat(xref(:,impc+1),1,params.mpc.N)];
-%     urefk = repmat(uref(:,impc),1,params.mpc.N+1);
-    
+%     xrefk = [xref(:,impc), repmat(xref(:,impc+1),1,obj.controlParams.mpc.N)];
+%     urefk = repmat(uref(:,impc),1,obj.controlParams.mpc.N+1);
+%     if impc> obj.controlParams.mpc.M-obj.controlParams.mpc.N
+%         FLAG = true;
+%     else
+%         FLAG = false;
+%     end
+    FLAG = false;
     Ts = Ts_ref(impc);
-    ctlk = obj.solve_load_mpc(Ts,xk,xrefk,urefk);
-    uk = ctlk.uOpt(:,1)
+    ctlk = obj.solve_load_mpc(Ts,xk,xrefk,urefk,FLAG);
+    uk = ctlk.uOpt(:,1);
     
     %% forward simulation
     % discrete -linear- simulation
