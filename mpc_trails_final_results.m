@@ -27,8 +27,8 @@ yalmip('clear')
 % end
 
 %% load optimized results
-folder = './results/Testcase_1_keyhole_2m/';
-% folder = './results/Testcase_2_inverted_pendulum/';
+% folder = './results/Testcase_1_keyhole_2m/';
+folder = './results/Testcase_2_inverted_pendulum/';
 % folder = './results/Testcase_3_triangles/';
 filename = 'workspace.mat';
 
@@ -46,14 +46,14 @@ uref = [uref, repmat(uref(:,end),1,N)];
 params = struct;
 % input bounds
 bounds.inputs.lb = [0; 0];
-bounds.inputs.ub = [13;13];%[15;15]; 
+bounds.inputs.ub = [15;15]; 
 % state bounds 
 bounds.states.lb = DATA.xL;
 bounds.states.ub = DATA.xU;
 sys = Quadrotorload(params,bounds);
 
 %% acutal model
-p.mL = 0.5;
+p.mL = 0.6;
 act_sys = Quadrotorload(p);
 
 
@@ -86,7 +86,7 @@ sys.controlParams = params;
 [dlqr_response] = sys.dlqr_load_Tracking(x0,tref,xref,uref,'CNL',act_sys);
 
 %% saving 
-save(strcat(folder,'control'),'dlqr_response','mpc_response');
+save(strcat(folder,'control_model_error'),'dlqr_response','mpc_response');
 
 %% plots
 xref = DATA.traj.x;

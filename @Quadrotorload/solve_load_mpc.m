@@ -61,7 +61,7 @@ cost = cost + (x(:,N+1)-xrefk(:,N+1))'*P*(x(:,N+1)-xrefk(:,N+1));
 % end
 
 %% optimization
-options = sdpsettings('verbose', false,'solver','quadprog');
+options = sdpsettings('verbose', false,'solver','IPOPT');
 options.ipopt.max_iter = 10000;
 sol = optimize(constraints,cost,options);
 
