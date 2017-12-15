@@ -30,8 +30,8 @@ yalmip('clear')
 % end
 
 %% load optimized results
-folder = './results/Testcase_1_keyhole_2m/';
-filename = 'matlab_workspace_TC1.mat';
+folder = './results/Testcase_3_triangles/';
+filename = 'workspace.mat';
 
 DATA = load(strcat(folder,filename));
 xref = DATA.traj.x;
@@ -86,10 +86,14 @@ sys.controlParams = params;
 %% MPC Control 
 [mpc_response] = sys.mpc_load_Tracking(x0,tref,xref,uref,'CNL');
 
+
+%% saving 
+save(strcat(folder,'control'),'dlqr_response','mpc_response');
+
 %% plots
 xref = DATA.traj.x;
 uref = DATA.traj.u;
-
+    
 % trajectory
 fig1 = figure; hold on;
 l_ref = plot(xref(1,:),xref(2,:),'k','linewidth',1);
