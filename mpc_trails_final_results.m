@@ -37,7 +37,7 @@ xref = DATA.traj.x;
 uref = DATA.traj.u;
 tref = DATA.traj.t;
 
-N = 8;
+N = 3;
 
 xref = [xref, repmat(xref(:,end),1,N)];
 uref = [uref, repmat(uref(:,end),1,N)];
@@ -74,13 +74,13 @@ params.mpc.N = N;
 % gains
 % params.mpc.Q = diag([100,100,10,10,1,1,1,1]);
 params.mpc.Q = 1*eye(sys.nDof);
-params.mpc.R = 1*eye(sys.nAct);
+params.mpc.R = .1*eye(sys.nAct);
 params.mpc.P = params.mpc.Q;    
 
 sys.controlParams = params;
 
 %% MPC Control 
-[mpc_response] = sys.mpc_load_Tracking(x0,tref,xref,uref,'CNL',act_sys);
+[mpc_response] = sys.mpc_load_Tracking(x0,tref,xref,uref,'DNL',act_sys);
 
 %% DLQR Control 
 [dlqr_response] = sys.dlqr_load_Tracking(x0,tref,xref,uref,'CNL',act_sys);
@@ -209,7 +209,7 @@ opts.td = tref';
 opts.xd = xref';
 opts.O = DATA.O;
 
-opts.vid.MAKE_MOVIE = false;
+opts.vid.MAKE_MOVIE = true;
 opts.vid.filename  = strcat(folder,'video');
 sys.animateQuadrotorload(opts);
 
