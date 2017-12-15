@@ -38,7 +38,8 @@ for impc = 1:obj.controlParams.mpc.M
 
     K = dlqr(A,B, 5*eye(obj.nDof), eye(obj.nAct));
 
-    uk = -K*(xk-xrefk) + urefk;
+    uk_ = -K*(xk-xrefk) + urefk;
+    uk = [max(0,min(uk_(1),obj.bounds.inputs.ub(1))); max(0,min(uk_(2),obj.bounds.inputs.ub(2)));];
 
     %% forward simulation
     if strcmp(type,'DL')
