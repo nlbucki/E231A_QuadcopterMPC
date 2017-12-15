@@ -27,8 +27,8 @@ yalmip('clear')
 % end
 
 %% load optimized results
-% folder = './results/Testcase_1_keyhole_2m/';
-folder = './results/Testcase_3_triangles/';
+folder = './results/Testcase_1_keyhole_2m/';
+% folder = './results/Testcase_3_triangles/';
 filename = 'workspace.mat';
 
 DATA = load(strcat(folder,filename));
@@ -36,7 +36,7 @@ xref = DATA.traj.x;
 uref = DATA.traj.u;
 tref = DATA.traj.t;
 
-N = 8;
+N = 5;
 
 xref = [xref, repmat(xref(:,end),1,N)];
 uref = [uref, repmat(uref(:,end),1,N)];
@@ -208,8 +208,8 @@ opts.td = time';
 opts.xd = xref';
 opts.O = DATA.O;
 
-opts.vid.MAKE_MOVIE = false;
-opts.vid.filename  = 'results/traj_load_inverted_pendelum';
+opts.vid.MAKE_MOVIE = true;
+opts.vid.filename  = strcat(folder,'video');
 sys.animateQuadrotorload(opts);
 
 
