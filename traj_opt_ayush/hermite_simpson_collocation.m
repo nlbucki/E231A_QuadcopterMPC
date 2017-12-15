@@ -41,8 +41,8 @@ for i = 1:2*N+1
     constraints = [constraints, input.lb<=u(:, i)<=input.ub];
 %     constraints = obstacle1(sys,constraints, x(:, i), 0, 0, 2);
 %     constraints = obstacle1(sys, constraints, x(:, i), 0, 3, 2);
-%     constraints = superEllipse(sys, constraints, x(:, i), 0, -15, 3, 14.9);
-%     constraints = superEllipse(sys, constraints, x(:, i), 0, 15, 3, 14.9);
+    constraints = superEllipse(sys, constraints, x(:, i), 0, -15, 3, 14.9);
+    constraints = superEllipse(sys, constraints, x(:, i), 0, 15, 3, 14.9);
 end
 
 % system dynamics (collocation constraints)
@@ -76,6 +76,16 @@ assign(Tf, soln.Tf);
 % assign(x, xinit);
 % assign(u, uinit);
 % assign(Tf, Tfinit);
+
+options.ipopt.mu_strategy      = 'adaptive';
+options.ipopt.max_iter         = 1000;
+options.ipopt.tol              = 1e-3;
+options.ipopt.linear_solver    = 'ma57';
+options.ipopt.ma57_automatic_scaling = 'yes';
+options.ipopt.linear_scaling_on_demand = 'no';
+options.ipopt.hessian_approximation = 'limited-memory';
+options.ipopt.limited_memory_update_type = 'bfgs';  % {bfgs}, sr1
+options.ipopt.limited_memory_max_history = 10;  % {6}
 
 tic
 opt = optimize(constraints, cost, options);
