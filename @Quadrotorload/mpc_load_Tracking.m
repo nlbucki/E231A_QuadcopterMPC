@@ -15,7 +15,7 @@ else
 sys_response.x = zeros(obj.nDof,obj.controlParams.mpc.M+1);
 sys_response.u = zeros(obj.nAct,obj.controlParams.mpc.M);
 sys_response.x(:,1) = x0;
-solver = @ode45;
+solver = @ode15s;
 
 Ts_ref = diff(tref);
 

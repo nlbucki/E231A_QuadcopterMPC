@@ -12,9 +12,6 @@ static_disp('');
 close all
 yalmip('clear')
 
-
-
-
 %% Load reference trajectory
 % diff-flat trajectory
 % --------------------
@@ -30,6 +27,7 @@ yalmip('clear')
 % end
 
 %% load optimized results
+% folder = './results/Testcase_1_keyhole_2m/';
 folder = './results/Testcase_3_triangles/';
 filename = 'workspace.mat';
 
@@ -38,7 +36,7 @@ xref = DATA.traj.x;
 uref = DATA.traj.u;
 tref = DATA.traj.t;
 
-N = 5;
+N = 8;
 
 xref = [xref, repmat(xref(:,end),1,N)];
 uref = [uref, repmat(uref(:,end),1,N)];
@@ -47,7 +45,7 @@ uref = [uref, repmat(uref(:,end),1,N)];
 params = struct;
 % input bounds
 bounds.inputs.lb = [0; 0];
-bounds.inputs.ub = [15;15]; 
+bounds.inputs.ub = [20;20];%[15;15]; 
 % state bounds 
 bounds.states.lb = DATA.xL;
 bounds.states.ub = DATA.xU;
@@ -73,19 +71,18 @@ params.mpc.M = length(tref)-1;
 params.mpc.N = N;
 
 % gains
-params.mpc.Q = diag([100,100,10,10,1,1,1,1]);
-% params.mpc.Q = eye(sys.nDof);
+% params.mpc.Q = diag([100,100,10,10,1,1,1,1]);
+params.mpc.Q = 1*eye(sys.nDof);
 params.mpc.R = 1*eye(sys.nAct);
 params.mpc.P = params.mpc.Q;    
 
 sys.controlParams = params;
 
-%% DLQR Control 
-[dlqr_response] = sys.dlqr_load_Tracking(x0,tref,xref,uref,'CNL');
-
 %% MPC Control 
 [mpc_response] = sys.mpc_load_Tracking(x0,tref,xref,uref,'CNL');
 
+%% DLQR Control 
+[dlqr_response] = sys.dlqr_load_Tracking(x0,tref,xref,uref,'CNL');
 
 %% saving 
 save(strcat(folder,'control'),'dlqr_response','mpc_response');

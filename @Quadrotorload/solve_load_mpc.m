@@ -48,9 +48,7 @@ for ii = 1:N
 end   
 % terminal cost
 cost = cost + (x(:,N+1)-xrefk(:,N+1))'*P*(x(:,N+1)-xrefk(:,N+1));
-if FINAL_CONST_FLAG
-    constraints = [constraints, x(:,N+1)==xrefk(:,N+1)];
-end
+
 % reference constraints
 % for ij = 1:N+1
 %     constraints = [constraints,...
@@ -74,7 +72,7 @@ else% sol.problem == 1
     ctl.xOpt = [];
     ctl.uOpt = [];
     ctl.JOpt = [];
-    warning('no feasible solutioin');
+    warning('no feasible solution');
     keyboard;
 end
 
