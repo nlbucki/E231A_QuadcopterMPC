@@ -31,13 +31,17 @@ constraints = [];
 constraints = [constraints, x(:,1)==xk];
 % looping over the N steps
 for ii = 1:N
+%     f0 = obj.systemDynamics([],xrefk(:,ii),urefk(:,ii));
+%     [A,B] = obj.linearizeQuadrotor(xrefk(:,ii),urefk(:,ii));
+%     dxk = f0 + A*(x(:,ii)-xrefk(:,ii)) + B*(u(:,ii)-urefk(:,ii));
+    
     f0 = obj.systemDynamics([],xrefk(:,ii),urefk(:,ii));
-    [A,B] = obj.linearizeQuadrotor(xrefk(:,ii),urefk(:,ii));
-    dxk = f0 + A*(x(:,ii)-xrefk(:,ii)) + B*(u(:,ii)-urefk(:,ii));
+    [A,B] = obj.discretizeLinearizeQuadrotorload(Ts, xrefk(:,ii),urefk(:,ii));
+    dxk = xrefk(:,ii+1)+ A*(x(:,ii)-xrefk(:,ii)) + B*(u(:,ii)-urefk(:,ii));
     
     constraints = [constraints,...
-%             x(:,ii+1) == f0 + A*(x(:,ii)-xref(:,ii))+B*(u(:,ii)-uref(:,ii)),... % dynamics
-            x(:,ii+1) == x(:,ii)+Ts*dxk,... % dynamics
+            x(:,ii+1) == dxk, ... % dynamics
+%             x(:,ii+1) == x(:,ii)+Ts*dxk,... % dynamics
             obj.bounds.inputs.lb <= u(:,ii), u(:,ii) <= obj.bounds.inputs.ub,... % input constraints
             obj.bounds.states.lb <= x(:,ii), x(:,ii) <= obj.bounds.states.ub... % state constraints
             ];

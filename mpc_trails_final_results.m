@@ -27,8 +27,8 @@ yalmip('clear')
 % end
 
 %% load optimized results
-folder = './results/Testcase_1_keyhole_2m/';
-% folder = './results/Testcase_2_inverted_pendulum/';
+% folder = './results/Testcase_1_keyhole_2m/';
+folder = './results/Testcase_2_inverted_pendulum/';
 % folder = './results/Testcase_3_triangles/';
 filename = 'workspace.mat';
 
@@ -37,7 +37,7 @@ xref = DATA.traj.x;
 uref = DATA.traj.u;
 tref = DATA.traj.t;
 
-N = 3;
+N = 8;
 
 xref = [xref, repmat(xref(:,end),1,N)];
 uref = [uref, repmat(uref(:,end),1,N)];
@@ -53,7 +53,7 @@ bounds.states.ub = DATA.xU;
 sys = Quadrotorload(params,bounds);
 
 %% acutal model
-p.mL = 0.6;
+p.mL = 0.5;
 act_sys = Quadrotorload(p);
 
 
@@ -74,13 +74,13 @@ params.mpc.N = N;
 % gains
 % params.mpc.Q = diag([100,100,10,10,1,1,1,1]);
 params.mpc.Q = 1*eye(sys.nDof);
-params.mpc.R = 0*eye(sys.nAct);
+params.mpc.R = 1*eye(sys.nAct);
 params.mpc.P = params.mpc.Q;    
 
 sys.controlParams = params;
 
 %% MPC Control 
-[mpc_response] = sys.mpc_load_Tracking(x0,tref,xref,uref,'DNL',act_sys);
+[mpc_response] = sys.mpc_load_Tracking(x0,tref,xref,uref,'CNL',act_sys);
 
 %% DLQR Control 
 [dlqr_response] = sys.dlqr_load_Tracking(x0,tref,xref,uref,'CNL',act_sys);
