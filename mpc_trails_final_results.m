@@ -27,9 +27,9 @@ yalmip('clear')
 % end
 
 %% load optimized results
-% folder = './results/Testcase_1_keyhole_2m/';
+folder = './results/Testcase_1_keyhole_2m/';
 % folder = './results/Testcase_2_inverted_pendulum/';
-folder = './results/Testcase_3_triangles/';
+% folder = './results/Testcase_3_triangles/';
 filename = 'workspace.mat';
 
 DATA = load(strcat(folder,filename));
@@ -37,7 +37,7 @@ xref = DATA.traj.x;
 uref = DATA.traj.u;
 tref = DATA.traj.t;
 
-N = 8;
+N = 3;
 
 xref = [xref, repmat(xref(:,end),1,N)];
 uref = [uref, repmat(uref(:,end),1,N)];
@@ -53,8 +53,8 @@ bounds.states.ub = DATA.xU;
 sys = Quadrotorload(params,bounds);
 
 %% acutal model
-act_sys = sys;
-act_sys.mQ = 1.1*sys.mQ;
+p.mL = 0.6;
+act_sys = Quadrotorload(p);
 
 
 %% Initial condition
@@ -73,17 +73,17 @@ params.mpc.N = N;
 
 % gains
 % params.mpc.Q = diag([100,100,10,10,1,1,1,1]);
-params.mpc.Q = 100*eye(sys.nDof);
-params.mpc.R = 0.01*eye(sys.nAct);
+params.mpc.Q = 1*eye(sys.nDof);
+params.mpc.R = 0*eye(sys.nAct);
 params.mpc.P = params.mpc.Q;    
 
 sys.controlParams = params;
 
 %% MPC Control 
-[mpc_response] = sys.mpc_load_Tracking(x0,tref,xref,uref,'DNL');
+[mpc_response] = sys.mpc_load_Tracking(x0,tref,xref,uref,'DNL',act_sys);
 
 %% DLQR Control 
-[dlqr_response] = sys.dlqr_load_Tracking(x0,tref,xref,uref,'CNL');
+[dlqr_response] = sys.dlqr_load_Tracking(x0,tref,xref,uref,'CNL',act_sys);
 
 %% saving 
 save(strcat(folder,'control'),'dlqr_response','mpc_response');
@@ -209,7 +209,7 @@ opts.td = tref';
 opts.xd = xref';
 opts.O = DATA.O;
 
-opts.vid.MAKE_MOVIE = true;
+opts.vid.MAKE_MOVIE = false;
 opts.vid.filename  = strcat(folder,'video');
 sys.animateQuadrotorload(opts);
 

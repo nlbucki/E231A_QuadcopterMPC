@@ -8,7 +8,7 @@ flag_MODEL_ERRORS= false;
 if nargin > 6
     flag_MODEL_ERRORS = true;
     act_sys = varargin{1};
-else
+end
 
 %% Control 
 % system response

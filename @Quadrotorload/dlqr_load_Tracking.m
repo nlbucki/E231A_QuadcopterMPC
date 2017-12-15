@@ -8,7 +8,7 @@ flag_MODEL_ERRORS= false;
 if nargin > 6
     flag_MODEL_ERRORS = true;
     act_sys = varargin{1};
-else
+end
 
 %% Control 
 % system response
@@ -41,12 +41,37 @@ for impc = 1:obj.controlParams.mpc.M
     uk = -K*(xk-xrefk) + urefk;
 
     %% forward simulation
-    if flag_MODEL_ERRORS
-        sol = act_sys.simulate([tref(impc),tref(impc+1)], xk, solver,uk);
-    else
-        sol = obj.simulate([tref(impc),tref(impc+1)], xk, solver,uk);
+    if strcmp(type,'DL')
+        if flag_MODEL_ERRORS
+            f0 = act_sys.systemDynamics([],xrefk(:,1),urefk(:,1));
+            [A,B] = act_sys.linearizeQuadrotor(xrefk(:,1),urefk(:,1));
+        else
+            f0 = obj.systemDynamics([],xrefk(:,1),urefk(:,1));
+            [A,B] = obj.linearizeQuadrotor(xrefk(:,1),urefk(:,1));
+        end
+        dxk = f0 + A*(xk-xrefk(:,1)) + B*(uk-urefk(:,1));
+        xk_next = xk + Ts*dxk;
     end
-    xk_next = sol.y(:,end);
+    
+	% discrete -nonlinear-simuation
+    if strcmp(type,'DNL')
+        if flag_MODEL_ERRORS
+            f = act_sys.systemDynamics([],xk,uk);
+        else
+            f = obj.systemDynamics([],xk,uk);
+        end
+        xk_next = xk + Ts*f;
+    end
+    
+    % continuous -nonlinear-simulation
+    if strcmp(type,'CNL')
+        if flag_MODEL_ERRORS
+            sol = act_sys.simulate([tref(impc),tref(impc+1)], xk, solver,uk);
+        else
+            sol = obj.simulate([tref(impc),tref(impc+1)], xk, solver,uk);
+        end
+        xk_next = sol.y(:,end);
+    end
 
     
     sys_response.x(:,impc+1) = xk_next;
