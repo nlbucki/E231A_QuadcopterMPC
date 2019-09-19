@@ -1,5 +1,7 @@
 # E231A_QuadcopterMPC
-MPC for quadcopter with hanging load
+This has be done as a group project within the MecEng 231a "Experiential Advanced Control Design I" course at UC Berkeley. 
+A modified MPC algorithm is run in the simulation, which does real-time obstacle avoidance on a 2D quadcopter with an underactuated hanging load. 
+A video can be found here: https://www.youtube.com/watch?v=zDYgxbn4v7E
 
 ### System Variables
 
